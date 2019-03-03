@@ -2,6 +2,24 @@ from entity import Node, Item, Entity
 
 
 class Engine:
+    """
+    Genetic algorithm engine
+
+    problem_name - Name of the problem
+    knapsack_data_type - Data type
+    nodes_num - Number of nodes
+    items_num - Number of items
+    max_capacity - Maximum capacity of knapsack
+    min_speed - Minimal speed
+    max_speed - Maximal speed
+    renting_ratio - Weight impact on speed
+    edge_weight_type - Type of edges
+    nodes - List of nodes
+    population_size - Size of the population
+    population - List of entities
+
+    DATA_DIR - path to data directory
+    """
     DATA_DIR = 'data/'
 
     def __init__(self, population_size):
@@ -20,11 +38,14 @@ class Engine:
         self.population = []
 
     def init(self):
+        """
+        Initializes population with random entities
+        """
         self.population = [Entity(self.nodes_num) for i in range(self.population_size)]
 
     def load_data(self, file_name):
         """
-        Load data from given file
+        Loads data from given file
 
         :param file_name: str
             Name of data file
