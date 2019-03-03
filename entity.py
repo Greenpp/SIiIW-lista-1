@@ -11,6 +11,7 @@ class Entity:
 
     def __init__(self, nodes_num=None):
         self.genotype = None if nodes_num is None else Genotype(nodes_num)
+        self.fitness = None
 
 
 class Node:
