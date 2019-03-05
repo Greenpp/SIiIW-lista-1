@@ -22,7 +22,15 @@ class Engine:
     """
     DATA_DIR = 'data/'
 
-    def __init__(self, population_size):
+    def __init__(self, population_size, knapsack_method='greedy'):
+        """
+        :param population_size: int
+            Number of entities in population
+        :param knapsack_method: str, optional
+            Method of item selection
+                greedy - greedy algorithm, same items for all entities
+                genetic - items are encoded into entity genome and optimized alongside with path
+        """
         self.problem_name = None
         self.knapsack_data_type = None
         self.nodes_num = None
@@ -34,6 +42,15 @@ class Engine:
         self.edge_weight_type = None
         self.nodes = []
 
+        self.knapsack_method = knapsack_method
+        if knapsack_method == 'greedy':
+            self.items = []
+        elif knapsack_method == 'genetic':
+            self.items = None
+        else:
+            print('Knapsack method error')
+            exit(1)
+
         self.population_size = population_size
         self.population = []
 
@@ -42,6 +59,34 @@ class Engine:
         Initializes population with random entities
         """
         self.population = [Entity(self.nodes_num) for i in range(self.population_size)]
+
+    def greedy_item_select(self, method='ratio'):
+        """
+        Marks items to steal with greedy algorithm
+
+        :param method: str, optional
+            Criteria by which items are picked
+                weight - light first
+                value - the most valuable first
+                ratio - best value/weight ratio first
+        """
+        if method == 'weight':
+            self.items.sort(key=lambda x: x.weight)
+        elif method == 'value':
+            self.items.sort(key=lambda x: x.value, reverse=True)
+        elif method == 'ratio':
+            self.items.sort(key=lambda x: x.ratio, reverse=True)
+        else:
+            print('Greedy method error')
+            exit(1)
+
+        weight_left = self.max_capacity
+        for item in self.items:
+            if item.weight <= weight_left:
+                item.to_steal = True
+                weight_left -= item.weight
+                if weight_left == 0:
+                    break
 
     def load_data(self, file_name):
         """
@@ -77,6 +122,9 @@ class Engine:
             _, profit, weight, node = item_line.split()
 
             item = Item(int(profit), int(weight))
+
+            if self.items is not None:
+                self.items.append(item)
 
             node_id = int(node) - 1
             self.nodes[node_id].add_item(item)

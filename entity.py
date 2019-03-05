@@ -40,11 +40,13 @@ class Entity:
             node1 = nodes[id1]
             node2 = nodes[id2]
 
-            # TODO steal from node 1, calculate value and speed
-            value = 0
+            city_value, city_weight = node1.steal()
+
+            weight += city_weight
             speed = max_speed - weight * (max_speed - min_speed) / max_weight
             time = node1.calculate_time_to(node2, speed)
-            self.fitness += value
+
+            self.fitness += city_value
             self.fitness -= time
 
 
@@ -91,21 +93,34 @@ class Node:
         return time
 
     def steal(self):
-        pass
+        """
+        Steals marked items form node
+
+        :return: tuple
+            Value of stolen items, weight of stolen items
+        """
+        value = 0
+        weight = 0
+        for item in self.items:
+            if item.to_steal:
+                value += item.value
+                weight += item.weight
+
+        return value, weight
 
 
 class Item:
     """
     Item
 
-    profit - Value of the item
+    value - Value of the item
     weight - Weight of the item
-    ratio - value/weight ratio
-    to_steal - if item will be picked
+    ratio - Value/weight ratio
+    to_steal - If item will be picked
     """
 
-    def __init__(self, profit, weight):
-        self.value = profit
+    def __init__(self, value, weight):
+        self.value = value
         self.weight = weight
-        self.ratio = profit / weight
+        self.ratio = value / weight
         self.to_steal = False
