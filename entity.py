@@ -13,7 +13,25 @@ class Entity:
         self.genotype = None if nodes_num is None else Genotype(nodes_num)
         self.fitness = None
 
-    def test(self, nodes, max_speed, min_speed):
+    def test(self, nodes, max_speed, min_speed, max_weight):
+        """
+        Calculates fitness
+
+        Used formula:
+            g(y) - f(x, y)
+        Where:
+            g(y) - sum of stolen items
+            f(x, y) - total time of traversal
+
+        :param nodes: list
+            List of all nodes
+        :param max_speed: float
+            Speed with empty bag
+        :param min_speed: float
+            Speed with full bag
+        :param max_weight: int
+            Capacity of bag
+        """
         self.fitness = 0
         weight = 0
         path = self.genotype.decode()
@@ -24,8 +42,7 @@ class Entity:
 
             # TODO steal from node 1, calculate value and speed
             value = 0
-            # TODO speed base on weight
-            speed = max_speed
+            speed = max_speed - weight * (max_speed - min_speed) / max_weight
             time = node1.calculate_time_to(node2, speed)
             self.fitness += value
             self.fitness -= time
@@ -42,11 +59,28 @@ class Node:
     def __init__(self, x, y):
         self.position = (x, y)
         self.items = []
+        self.sort_order = None
 
     def add_item(self, item):
+        """
+        Inserts new item to node
+
+        :param item: Item
+            New item
+        """
         self.items.append(item)
 
     def calculate_time_to(self, node, speed):
+        """
+        Calculates time it takes to get from this node to another with given speed
+
+        :param node: Node
+            Other node
+        :param speed: float
+            Given speed
+        :return: float
+            Time
+        """
         x1, y1 = self.position
         x2, y2 = node.position
 
@@ -55,6 +89,42 @@ class Node:
         time = distance / speed
 
         return time
+
+    def steal_greedy_weight(self, capacity):
+        """
+        Steals items from node with greedy algorithm prioritizing light items
+
+        :param capacity: int
+            Left capacity of bag
+        :return: TODO
+        """
+        if self.sort_order != 'weight:':
+            self.items.sort(key=lambda x: x.weight)
+            self.sort_order = 'weight'
+
+    def steal_greedy_value(self, capacity):
+        """
+        Steals items from node with greedy algorithm prioritizing valuable items
+
+        :param capacity: int
+            Left capacity of bag
+        :return: TODO
+        """
+        if self.sort_order != 'value':
+            self.items.sort(key=lambda x: x.value, reverse=True)
+            self.sort_order = 'value'
+
+    def steal_greedy_ratio(self, capacity):
+        """
+        Steals items from node with greedy algorithm prioritizing items with better value/weight ratio
+
+        :param capacity: int
+            Left capacity of bag
+        :return: TODO
+        """
+        if self.sort_order != 'ratio':
+            self.items.sort(key=lambda x: x.ratio, reverse=True)
+            self.sort_order = 'ratio'
 
 
 class Item:
@@ -66,5 +136,6 @@ class Item:
     """
 
     def __init__(self, profit, weight):
-        self.profit = profit
+        self.value = profit
         self.weight = weight
+        self.ratio = profit / weight
