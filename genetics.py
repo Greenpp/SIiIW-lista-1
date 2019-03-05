@@ -11,3 +11,15 @@ class Genotype:
     def __init__(self, nodes_num):
         self.nodes_order = list(range(nodes_num))
         random.shuffle(self.nodes_order)
+
+    def decode(self):
+        """
+        Decodes genotype to phenotype
+
+        :return: list
+            List of nodes pairs in traversal order
+        """
+        phenotype = list(zip(self.nodes_order[:-1], self.nodes_order[1:]))
+        phenotype.append((self.nodes_order[-1], self.nodes_order[0]))
+
+        return phenotype
