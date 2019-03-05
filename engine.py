@@ -76,7 +76,7 @@ class Engine:
         for item_line in item_lines:
             _, profit, weight, node = item_line.split()
 
-            item = Item(profit, weight)
+            item = Item(int(profit), int(weight))
 
             node_id = int(node) - 1
             self.nodes[node_id].add_item(item)
