@@ -12,7 +12,7 @@ class Engine:
     max_capacity - Maximum capacity of knapsack
     min_speed - Minimal speed
     max_speed - Maximal speed
-    renting_ratio - Weight impact on speed
+    renting_ratio - Not used
     edge_weight_type - Type of edges
     nodes - List of nodes
     population_size - Size of the population
