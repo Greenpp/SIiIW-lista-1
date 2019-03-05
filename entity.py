@@ -90,41 +90,8 @@ class Node:
 
         return time
 
-    def steal_greedy_weight(self, capacity):
-        """
-        Steals items from node with greedy algorithm prioritizing light items
-
-        :param capacity: int
-            Left capacity of bag
-        :return: TODO
-        """
-        if self.sort_order != 'weight:':
-            self.items.sort(key=lambda x: x.weight)
-            self.sort_order = 'weight'
-
-    def steal_greedy_value(self, capacity):
-        """
-        Steals items from node with greedy algorithm prioritizing valuable items
-
-        :param capacity: int
-            Left capacity of bag
-        :return: TODO
-        """
-        if self.sort_order != 'value':
-            self.items.sort(key=lambda x: x.value, reverse=True)
-            self.sort_order = 'value'
-
-    def steal_greedy_ratio(self, capacity):
-        """
-        Steals items from node with greedy algorithm prioritizing items with better value/weight ratio
-
-        :param capacity: int
-            Left capacity of bag
-        :return: TODO
-        """
-        if self.sort_order != 'ratio':
-            self.items.sort(key=lambda x: x.ratio, reverse=True)
-            self.sort_order = 'ratio'
+    def steal(self):
+        pass
 
 
 class Item:
@@ -133,9 +100,12 @@ class Item:
 
     profit - Value of the item
     weight - Weight of the item
+    ratio - value/weight ratio
+    to_steal - if item will be picked
     """
 
     def __init__(self, profit, weight):
         self.value = profit
         self.weight = weight
         self.ratio = profit / weight
+        self.to_steal = False
