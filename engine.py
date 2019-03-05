@@ -129,7 +129,7 @@ class Engine:
         for node_line in node_lines:
             _, x, y = node_line.split()
 
-            node = Node(x, y)
+            node = Node(float(x), float(y))
             self.nodes.append(node)
 
         for item_line in item_lines:
