@@ -10,6 +10,10 @@ class Entity:
     """
 
     def __init__(self, nodes_num=None):
+        """
+        :param nodes_num: int, optional
+            Total number of nodes
+        """
         self.genotype = None if nodes_num is None else Genotype(nodes_num)
         self.fitness = None
 
@@ -59,6 +63,12 @@ class Node:
     """
 
     def __init__(self, x, y):
+        """
+        :param x: float
+            X coordinate of node
+        :param y: float
+            Y coordinate of node
+        """
         self.position = (x, y)
         self.items = []
         self.sort_order = None
@@ -120,6 +130,12 @@ class Item:
     """
 
     def __init__(self, value, weight):
+        """
+        :param value: int
+            Value of item
+        :param weight: int
+            Weight of item
+        """
         self.value = value
         self.weight = weight
         self.ratio = value / weight

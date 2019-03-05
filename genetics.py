@@ -9,6 +9,10 @@ class Genotype:
     """
 
     def __init__(self, nodes_num):
+        """
+        :param nodes_num: int
+            Total number of nodes
+        """
         self.nodes_order = list(range(nodes_num))
         random.shuffle(self.nodes_order)
 
