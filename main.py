@@ -4,3 +4,6 @@ eng = Engine(10)
 
 eng.load_data('trivial_1.ttp')
 eng.init()
+
+eng.test()
+eng.sort()

@@ -60,6 +60,20 @@ class Engine:
         """
         self.population = [Entity(self.nodes_num) for i in range(self.population_size)]
 
+    def test(self):
+        """
+        Calculates fitness for new entities in population
+        """
+        for entity in self.population:
+            if entity.fitness is None:
+                entity.test(self.nodes, self.max_speed, self.min_speed, self.max_capacity)
+
+    def sort(self):
+        """
+        Sorts population base on fitness
+        """
+        self.population.sort(key=lambda x: x.fitness, reverse=True)
+
     def greedy_item_select(self, method='ratio'):
         """
         Marks items to steal with greedy algorithm
