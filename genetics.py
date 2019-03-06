@@ -50,3 +50,44 @@ class Genotype:
         # inverse <pos1, pos2>
         for i, v in zip(range(pos2 - pos1 + 1), reversed(self.nodes_order[pos1:pos2 + 1])):
             self.nodes_order[pos1 + i] = v
+
+    def crossover_simple(self, genotype):
+        """
+        Simple crossover, cuts both genotypes in random place, then creates child with p1p2 parts
+        After concatenation genotype is checked for redundant nodes which are replaced with missing ones
+            p1 - parent 1
+            p2 - parent 2
+        :param genotype: Genotype
+            Parent 2
+        :return: Genotype
+            Child genotype
+        """
+        pos = random.choice(range(len(self.nodes_order)))
+
+        child_order = self.nodes_order[:pos] + genotype.nodes_order[pos:]
+
+        # fix
+        # find redundant nodes indices
+        child_nodes = set()
+        idx_to_fix = []
+        for i, node in enumerate(child_order):
+            if node not in child_nodes:
+                child_nodes.add(node)
+            else:
+                idx_to_fix.append(i)
+
+        if len(idx_to_fix) > 0:
+            # if any redundant nodes fix in random order
+            random.shuffle(idx_to_fix)
+
+            # calculate missing nodes
+            all_nodes = set(self.nodes_order)
+            missing_nodes = all_nodes.difference(child_nodes)
+
+            for i, n in zip(idx_to_fix, missing_nodes):
+                child_order[i] = n
+
+        child_genotype = Genotype()
+        child_genotype.nodes_order = child_order
+
+        return child_genotype
