@@ -17,7 +17,7 @@ class Entity:
         self.genotype = None if nodes_num is None else Genotype(nodes_num)
         self.fitness = None
 
-    def test(self, nodes, max_speed, min_speed, max_weight):
+    def test(self, nodes, min_speed, max_speed, max_weight):
         """
         Calculates fitness
 

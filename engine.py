@@ -66,7 +66,7 @@ class Engine:
         """
         for entity in self.population:
             if entity.fitness is None:
-                entity.test(self.nodes, self.max_speed, self.min_speed, self.max_capacity)
+                entity.test(self.nodes, self.min_speed, self.max_speed, self.max_capacity)
 
     def sort(self):
         """
