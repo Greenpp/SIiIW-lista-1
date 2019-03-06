@@ -29,6 +29,22 @@ class Genotype:
 
         return phenotype
 
+    def mutate(self, method='swap'):
+        """
+        Mutates genotype with given method
+
+        :param method: str, optional
+            Name of the mutation
+        """
+        mutations = {'swap': self.mutation_swap,
+                     'inverse': self.mutation_inverse}
+
+        if method not in mutations:
+            print('Mutation type error')
+            exit(1)
+
+        mutations[method]()
+
     def mutation_swap(self):
         """
         Mutation swaps two random nodes
@@ -50,6 +66,25 @@ class Genotype:
         # inverse <pos1, pos2>
         for i, v in zip(range(pos2 - pos1 + 1), reversed(self.nodes_order[pos1:pos2 + 1])):
             self.nodes_order[pos1 + i] = v
+
+    def crossover(self, genotype, method='simple'):
+        """
+        Executes given type of crossover
+
+        :param genotype: Genotype
+            Parent 2
+        :param method: str, optional
+            Type of crossover
+        :return: Genotype
+            Child
+        """
+        crossovers = {'simple': self.crossover_simple}
+
+        if method not in crossovers:
+            print('Crossover type error')
+            exit(1)
+
+        return crossovers[method](genotype)
 
     def crossover_simple(self, genotype):
         """
