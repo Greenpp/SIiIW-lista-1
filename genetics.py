@@ -8,13 +8,14 @@ class Genotype:
     nodes_order - Order of visited nodes
     """
 
-    def __init__(self, nodes_num):
+    def __init__(self, nodes_num=None):
         """
-        :param nodes_num: int
+        :param nodes_num: int, optional
             Total number of nodes
         """
-        self.nodes_order = list(range(nodes_num))
-        random.shuffle(self.nodes_order)
+        self.nodes_order = list(range(nodes_num)) if nodes_num is not None else None
+        if nodes_num is not None:
+            random.shuffle(self.nodes_order)
 
     def decode(self):
         """
