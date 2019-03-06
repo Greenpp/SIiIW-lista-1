@@ -1,4 +1,5 @@
 from entity import Node, Item, Entity
+import random
 
 
 class Engine:
@@ -59,6 +60,8 @@ class Engine:
         Initializes population with random entities
         """
         self.population = [Entity(self.nodes_num) for i in range(self.population_size)]
+        self.test()
+        self.sort()
 
     def test(self):
         """
@@ -73,6 +76,63 @@ class Engine:
         Sorts population base on fitness
         """
         self.population.sort(key=lambda x: x.fitness, reverse=True)
+
+    def next_generation(self):
+        """
+        Procedes to next generation, selects new population, tests and sorts it
+        """
+        self.selection()
+        self.test()
+        self.sort()
+
+    def selection(self, method='roulette', keep_best=True):
+        """
+        Creates new population with given method
+
+        :param method: str, optional
+            Name of the selection method
+        :param keep_best: bool, optional
+            If best entity should be passed unchanged
+        """
+        selection_methods = {'roulette': self.selection_roulette}
+
+        if method not in selection_methods:
+            print('Selection type error')
+            exit(1)
+
+        selection_methods[method](keep_best)
+
+    def selection_roulette(self, keep_best=True):
+        """
+        Creates new population base on weighted roulette system to pick parents
+
+        :param keep_best: bool, optional
+            If best entity should be passed unchanged
+        """
+        new_population = []
+
+        if keep_best:
+            # passing best entity unchanged
+            new_population.append(self.population[0])
+
+        weights = [e.fitness for e in self.population]
+
+        # shift to avoid negative values
+        min_weight = min(weights)
+        shifted_weights = [w - min_weight + 1 for w in weights]
+
+        # normalization
+        weight_sum = sum(shifted_weights)
+        norm_weights = [w / weight_sum for w in shifted_weights]
+
+        # mating
+        while len(new_population) < self.population_size:
+            p1, p2 = random.choices(self.population, weights=norm_weights, k=2)
+
+            child = p1.mate(p2)
+            new_population.append(child)
+
+        self.population = new_population
 
     def greedy_item_select(self, method='ratio'):
         """
