@@ -72,13 +72,14 @@ class Genotype:
         Executes given type of crossover
 
         :param genotype: Genotype
-            Parent 2
+            Parent 2 genotype
         :param method: str, optional
             Type of crossover
         :return: Genotype
             Child
         """
-        crossovers = {'simple': self.crossover_simple}
+        crossovers = {'simple': self.crossover_simple,
+                      'ox': self.crossover_ox}
 
         if method not in crossovers:
             print('Crossover type error')
@@ -93,7 +94,7 @@ class Genotype:
             p1 - parent 1
             p2 - parent 2
         :param genotype: Genotype
-            Parent 2
+            Parent 2 genotype
         :return: Genotype
             Child genotype
         """
@@ -121,6 +122,41 @@ class Genotype:
 
             for i, n in zip(idx_to_fix, missing_nodes):
                 child_order[i] = n
+
+        child_genotype = Genotype()
+        child_genotype.nodes_order = child_order
+
+        return child_genotype
+
+    def crossover_ox(self, genotype):
+        """
+        Order crossover (OX), selects random section, then removes in p2 all nodes included in it in p1 and shifts left
+        nodes to the left with base on right end of section, finally moves section from p1 into empty spot in p2
+            p1 - parent 1
+            p2 - parent 2
+        :param genotype: Genotype
+            Parent 2 genotype
+        :return: Genotype
+            Child genotype
+        """
+        # section to cut
+        pos1, pos2 = random.sample(range(len(self.nodes_order)), 2)
+
+        # reorder new genotype before insertion
+        child_order = genotype.nodes_order[pos2:] + genotype.nodes_order[:pos2]
+        transplant = self.nodes_order[pos1:pos2]
+
+        # remove redundant nodes and shift
+        for v in transplant:
+            child_order.remove(v)
+
+        # insert and return to original order
+        child_order = transplant + child_order
+
+        transplant_len = len(transplant)
+        nodes_after_transplant = len(self.nodes_order) - pos2
+        reorder_pos = transplant_len + nodes_after_transplant
+        child_order = child_order[reorder_pos:] + child_order[:reorder_pos]
 
         child_genotype = Genotype()
         child_genotype.nodes_order = child_order
