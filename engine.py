@@ -1,5 +1,6 @@
 from entity import Node, Item, Entity
 import random
+from matplotlib import pyplot as plt
 
 
 class Engine:
@@ -55,6 +56,10 @@ class Engine:
         self.population_size = population_size
         self.population = []
 
+        self.logged_data = {'min': [],
+                            'max': [],
+                            'avg': []}
+
     def init(self):
         """
         Initializes population with random entities
@@ -84,6 +89,34 @@ class Engine:
         self.selection()
         self.test()
         self.sort()
+        self.log_data()
+
+    def log_data(self):
+        """
+        Stores current generation max, min and avg fitness
+        """
+        fitness_data = [e.fitness for e in self.population]
+
+        min_fitness = min(fitness_data)
+        max_fitness = max(fitness_data)
+        avg_fitness = sum(fitness_data) / len(fitness_data)
+
+        self.logged_data['min'].append(min_fitness)
+        self.logged_data['max'].append(max_fitness)
+        self.logged_data['avg'].append(avg_fitness)
+
+    def plot_data(self):
+        """
+        Plots logged data
+        """
+        plt.plot(self.logged_data['min'], 'r')
+        plt.plot(self.logged_data['avg'], 'y')
+        plt.plot(self.logged_data['max'], 'g')
+
+        plt.xlabel('Generation')
+        plt.ylabel('Fitness')
+
+        plt.show()
 
     def selection(self, method='roulette', keep_best=True):
         """
