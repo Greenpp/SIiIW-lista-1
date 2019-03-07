@@ -87,7 +87,7 @@ class Engine:
         """
         Procedes to next generation, selects new population, tests and sorts it
         """
-        self.selection()
+        self.selection(method='tournament')
         self.test()
         self.sort()
         self.log_data()
@@ -121,7 +121,7 @@ class Engine:
 
         plt.show()
 
-    def selection(self, method='roulette', keep_best=True):
+    def selection(self, method='roulette', **kwargs):
         """
         Creates new population with given method
 
@@ -130,17 +130,18 @@ class Engine:
         :param keep_best: bool, optional
             If best entity should be passed unchanged
         """
-        selection_methods = {'roulette': self.selection_roulette}
+        selection_methods = {'roulette': self.selection_roulette,
+                             'tournament': self.selection_tournament}
 
         if method not in selection_methods:
             print('Selection type error')
             exit(1)
 
-        selection_methods[method](keep_best)
+        selection_methods[method]()
 
     def selection_roulette(self, keep_best=True):
         """
-        Creates new population base on weighted roulette system to pick parents
+        Creates new population with weighted roulette system to pick parents
 
         :param keep_best: bool, optional
             If best entity should be passed unchanged
@@ -164,6 +165,30 @@ class Engine:
         # mating
         while len(new_population) < self.population_size:
             p1, p2 = random.choices(self.population, weights=norm_weights, k=2)
+
+            child = p1.mate(p2)
+            new_population.append(child)
+
+        self.population = new_population
+
+    def selection_tournament(self, size=8, keep_best=True):
+        """
+        Creates new population with random tournaments system to pick parents
+
+        :param size: int
+            Number of randomly picked entities for tournament
+        :param keep_best: If best entity should be passed unchanged
+        """
+        new_population = []
+
+        if keep_best:
+            # passing best entity unchanged
+            new_population.append(self.population[0])
+
+        while len(new_population) < self.population_size:
+            # select parents from 2 random tournaments
+            p1 = max(random.sample(self.population, size), key=lambda x: x.fitness)
+            p2 = max(random.sample(self.population, size), key=lambda x: x.fitness)
 
             child = p1.mate(p2)
             new_population.append(child)
