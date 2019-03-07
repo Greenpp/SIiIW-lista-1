@@ -79,7 +79,8 @@ class Genotype:
             Child
         """
         crossovers = {'simple': self.crossover_simple,
-                      'ox': self.crossover_ox}
+                      'ox': self.crossover_ox,
+                      'cx': self.crossover_cx}
 
         if method not in crossovers:
             print('Crossover type error')
@@ -157,6 +158,53 @@ class Genotype:
         nodes_after_transplant = len(self.nodes_order) - pos2
         reorder_pos = transplant_len + nodes_after_transplant
         child_order = child_order[reorder_pos:] + child_order[:reorder_pos]
+
+        child_genotype = Genotype()
+        child_genotype.nodes_order = child_order
+
+        return child_genotype
+
+    def crossover_cx(self, genotype):
+        """
+        Cycle crossover (CX), creates child with p1 values from odd cycles and p2 values from even cycles
+            p1 - parent 1
+            p2 - parent 2
+            cycle -  for 1 2 3 4
+                     and 3 1 2 4 cycles: 1->3->2->1 and 4->4
+
+        :param genotype: Genotype
+            Parent 2 genotype
+        :return: Genotype
+            Child genotype
+        """
+        # copy parent 1 order
+        child_order = self.nodes_order[:]
+
+        # set every pos from even cycle to value of parent 2
+        checked = set()
+        cycle = 1
+
+        for i, n in enumerate(self.nodes_order):
+            # find first cycle node
+            if n not in checked:
+                pos = i
+                while True:
+                    parent2_val = genotype.nodes_order[pos]
+                    if cycle % 2 == 0:
+                        # insert even cycle values from parent 2
+                        child_order[pos] = parent2_val
+
+                    checked.add(self.nodes_order[pos])
+                    if parent2_val in checked:
+                        # cycle finished
+                        break
+
+                    pos = self.nodes_order.index(parent2_val)
+
+                if len(checked) == len(self.nodes_order):
+                    # finish if all nodes checked
+                    break
+                cycle += 1
 
         child_genotype = Genotype()
         child_genotype.nodes_order = child_order
