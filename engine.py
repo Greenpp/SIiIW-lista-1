@@ -67,6 +67,7 @@ class Engine:
         self.population = [Entity(self.nodes_num) for i in range(self.population_size)]
         self.test()
         self.sort()
+        self.log_data()
 
     def test(self):
         """
@@ -115,6 +116,8 @@ class Engine:
 
         plt.xlabel('Generation')
         plt.ylabel('Fitness')
+
+        plt.title(self.problem_name)
 
         plt.show()
 
