@@ -1,5 +1,6 @@
-from genetics import Genotype
 from random import random
+
+from genetics import Genotype
 
 
 class Entity:
@@ -54,7 +55,7 @@ class Entity:
             self.fitness += city_value
             self.fitness -= time
 
-    def mate(self, entity, mutation_rate=.01):
+    def mate(self, entity, mutation_rate=.01, crossover_method='simple', mutation_method='swap'):
         """
         Creates child with second entity
 
@@ -62,6 +63,10 @@ class Entity:
             Parent 2
         :param mutation_rate: float, optional
             Probability of mutation
+        :param crossover_method: str, optional
+            Crossover method
+        :param mutation_method: str, optional
+            Mutation method
         :return: Entity
             Child
         """
@@ -69,12 +74,12 @@ class Entity:
         p2 = entity.genotype
 
         # crossover
-        child_genotype = p1.crossover(p2, method='simple')
+        child_genotype = p1.crossover(p2, method=crossover_method)
 
         # mutation
         rnd = random()
         if rnd < mutation_rate:
-            child_genotype.mutate(method='swap')
+            child_genotype.mutate(method=mutation_method)
 
         child = Entity()
         child.genotype = child_genotype

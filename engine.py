@@ -1,6 +1,8 @@
-from entity import Node, Item, Entity
 import random
+
 from matplotlib import pyplot as plt
+
+from entity import Node, Item, Entity
 
 
 class Engine:
@@ -8,31 +10,89 @@ class Engine:
     Genetic algorithm engine
 
     problem_name - Name of the problem
-    knapsack_data_type - Data type
+    knapsack_data_type - Not used
     nodes_num - Number of nodes
     items_num - Number of items
     max_capacity - Maximum capacity of knapsack
     min_speed - Minimal speed
     max_speed - Maximal speed
     renting_ratio - Not used
-    edge_weight_type - Type of edges
+    edge_weight_type - Not used
     nodes - List of nodes
-    population_size - Size of the population
     population - List of entities
 
     DATA_DIR - path to data directory
     """
     DATA_DIR = 'data/'
 
-    def __init__(self, population_size, knapsack_method='greedy'):
+    def __init__(self, population_size=100, mutation_ratio=.01, keep_best=True, selection_method='roulette',
+                 crossover_method='simple', mutation_method='swap', knapsack_method='greedy', **kwargs):
         """
-        :param population_size: int
+        :param population_size: int, optional
             Number of entities in population
+        :param mutation_ratio: float, optional
+            Probability of mutation during crossover
+        :param keep_best: bool, optional
+            If the best entity should be passed to the next generation unchanged
+        :param selection_method: str, optional
+            Method of selection
+                -roulette
+                -tournament
+        :param crossover_method: str, optional
+            Method of crossover
+                -simple
+                -ox
+                -cx
+                -TODO pmx
+        :param mutation_method: str, option
+            Method of mutation
+                -swap
+                -inverse
         :param knapsack_method: str, optional
             Method of item selection
-                greedy - greedy algorithm, same items for all entities
-                genetic - items are encoded into entity genome and optimized alongside with path
+                -greedy - greedy algorithm, same items for all entities
+                -genetic - items are encoded into entity genome and optimized alongside with path TODO
+
+        :param kwargs:
+            :param tournament_size: int, optional
+                Number of randomly picked entities for tournaments
+            :param greedy_method: str, optional
+                Criteria by which items are picked
+                    -weight
+                    -value
+                    -ratio
+
         """
+        self.population_size = population_size
+
+        self.mutation_rate = mutation_ratio
+
+        self.keep_best = keep_best
+
+        self.selection_method = selection_method
+        if selection_method == 'tournament':
+            if 'tournament_size' not in kwargs:
+                self.tournament_size = int(population_size * 8 / 100)
+            else:
+                self.tournament_size = kwargs['tournament_size']
+
+        self.crossover_method = crossover_method
+
+        self.mutation_method = mutation_method
+
+        self.knapsack_method = knapsack_method
+        if knapsack_method == 'greedy':
+            if 'greedy_method' not in kwargs:
+                self.greedy_method = 'ratio'
+            else:
+                self.greedy_method = kwargs['greedy_method']
+            self.items = []
+        elif knapsack_method == 'genetic':
+            self.items = None
+        else:
+            print('Knapsack method error')
+            exit(1)
+
         self.problem_name = None
         self.knapsack_data_type = None
         self.nodes_num = None
@@ -44,21 +104,40 @@ class Engine:
         self.edge_weight_type = None
         self.nodes = []
 
-        self.knapsack_method = knapsack_method
-        if knapsack_method == 'greedy':
-            self.items = []
-        elif knapsack_method == 'genetic':
-            self.items = None
-        else:
-            print('Knapsack method error')
-            exit(1)
-
-        self.population_size = population_size
         self.population = []
 
         self.logged_data = {'min': [],
                             'max': [],
                             'avg': []}
+
+    def run(self, generations=None, fitness=None, info_every=None):
+        """
+        Runs algorithm for n generations or until given fitness is met and plots data at the end
+        If neither generations or fitness is given it will run forever
+
+        :param generations: int, optional
+            Number of generations before algorithm will be terminated
+        :param fitness: float, optional
+            Minimal fitness at witch algorithm will be terminated
+        :param info_every: int, optional
+            At every n-th generation information about number and fitness will be printed
+        """
+        if self.knapsack_method == 'greedy':
+            self.greedy_item_select()
+
+        self.init()
+        generation = 0
+        while True:
+            if info_every is not None and generation % info_every == 0:
+                print('Generation: {}\nFitness: {}'.format(generation, self.population[0].fitness))
+            if generations is not None and generation == generations:
+                break
+            if fitness is not None and self.population[0].fitness >= fitness:
+                break
+            self.next_generation()
+            generation += 1
+
+        self.plot_data()
 
     def init(self):
         """
@@ -87,7 +166,7 @@ class Engine:
         """
         Procedes to next generation, selects new population, tests and sorts it
         """
-        self.selection(method='tournament')
+        self.selection()
         self.test()
         self.sort()
         self.log_data()
@@ -121,34 +200,25 @@ class Engine:
 
         plt.show()
 
-    def selection(self, method='roulette', **kwargs):
+    def selection(self):
         """
-        Creates new population with given method
-
-        :param method: str, optional
-            Name of the selection method
-        :param keep_best: bool, optional
-            If best entity should be passed unchanged
+        Creates new population
         """
-        selection_methods = {'roulette': self.selection_roulette,
-                             'tournament': self.selection_tournament}
-
-        if method not in selection_methods:
+        if self.selection_method == 'roulette':
+            self.selection_roulette()
+        elif self.selection_method == 'tournament':
+            self.selection_tournament()
+        else:
             print('Selection type error')
             exit(1)
 
-        selection_methods[method]()
-
-    def selection_roulette(self, keep_best=True):
+    def selection_roulette(self):
         """
         Creates new population with weighted roulette system to pick parents
-
-        :param keep_best: bool, optional
-            If best entity should be passed unchanged
         """
         new_population = []
 
-        if keep_best:
+        if self.keep_best:
             # passing best entity unchanged
             new_population.append(self.population[0])
 
@@ -166,50 +236,45 @@ class Engine:
         while len(new_population) < self.population_size:
             p1, p2 = random.choices(self.population, weights=norm_weights, k=2)
 
-            child = p1.mate(p2)
+            child = p1.mate(p2, self.mutation_rate, self.crossover_method, self.mutation_method)
             new_population.append(child)
 
         self.population = new_population
 
-    def selection_tournament(self, size=8, keep_best=True):
+    def selection_tournament(self):
         """
         Creates new population with random tournaments system to pick parents
-
-        :param size: int
-            Number of randomly picked entities for tournament
-        :param keep_best: If best entity should be passed unchanged
         """
         new_population = []
 
-        if keep_best:
+        if self.keep_best:
             # passing best entity unchanged
             new_population.append(self.population[0])
 
         while len(new_population) < self.population_size:
             # select parents from 2 random tournaments
-            p1 = max(random.sample(self.population, size), key=lambda x: x.fitness)
-            p2 = max(random.sample(self.population, size), key=lambda x: x.fitness)
+            p1 = max(random.sample(self.population, self.tournament_size), key=lambda x: x.fitness)
+            p2 = max(random.sample(self.population, self.tournament_size), key=lambda x: x.fitness)
 
-            child = p1.mate(p2)
+            child = p1.mate(p2, self.mutation_rate, self.crossover_method, self.mutation_method)
             new_population.append(child)
 
         self.population = new_population
 
-    def greedy_item_select(self, method='ratio'):
+    def greedy_item_select(self):
         """
         Marks items to steal with greedy algorithm
 
-        :param method: str, optional
-            Criteria by which items are picked
-                weight - light first
-                value - the most valuable first
-                ratio - best value/weight ratio first
+        Criteria by which items are picked
+            weight - light first
+            value - the most valuable first
+            ratio - best value/weight ratio first
         """
-        if method == 'weight':
+        if self.greedy_method == 'weight':
             self.items.sort(key=lambda x: x.weight)
-        elif method == 'value':
+        elif self.greedy_method == 'value':
             self.items.sort(key=lambda x: x.value, reverse=True)
-        elif method == 'ratio':
+        elif self.greedy_method == 'ratio':
             self.items.sort(key=lambda x: x.ratio, reverse=True)
         else:
             print('Greedy method error')
