@@ -80,7 +80,8 @@ class Genotype:
         """
         crossovers = {'simple': self.crossover_simple,
                       'ox': self.crossover_ox,
-                      'cx': self.crossover_cx}
+                      'cx': self.crossover_cx,
+                      'pmx': self.crossover_pmx}
 
         if method not in crossovers:
             print('Crossover type error')
@@ -141,7 +142,7 @@ class Genotype:
             Child genotype
         """
         # section to cut
-        pos1, pos2 = random.sample(range(len(self.nodes_order)), 2)
+        pos1, pos2 = sorted(random.sample(range(len(self.nodes_order)), 2))
 
         # reorder new genotype before insertion
         child_order = genotype.nodes_order[pos2:] + genotype.nodes_order[:pos2]
@@ -205,6 +206,51 @@ class Genotype:
                     # finish if all nodes checked
                     break
                 cycle += 1
+
+        child_genotype = Genotype()
+        child_genotype.nodes_order = child_order
+
+        return child_genotype
+
+    def crossover_pmx(self, genotype):
+        """
+        PMX crossover (PMX), creates child with fragment of p1, then moves excluded in fragment nodes from the same area
+        in p2 outside it, finally copies missing nodes from p2
+
+        :param genotype: Genotype
+            Parent 2 genotype
+        :return: Genotype
+            Child genotype
+        """
+        # section to cut
+        pos1, pos2 = sorted(random.sample(range(len(self.nodes_order)), 2))
+
+        # create child and swath to transplant
+        transplant = self.nodes_order[pos1:pos2]
+        child_order = [-1 for i in range(len(self.nodes_order))]
+
+        # insert transplant
+        for ti, ci in enumerate(range(pos1, pos2)):
+            child_order[ci] = transplant[ti]
+
+        # change transplant to set for faster lookup
+        transplant = set(transplant)
+
+        transplant_range = set(range(pos1, pos2))
+        # move nodes from transplant range in parent 2 not included in transplant outside
+        for i in range(pos1, pos2):
+            if genotype.nodes_order[i] not in transplant:
+                cycle_pos = i
+                moved_node = genotype.nodes_order[i]
+                while cycle_pos in transplant_range:
+                    p1_val = self.nodes_order[cycle_pos]
+                    cycle_pos = genotype.nodes_order.index(p1_val)
+                child_order[cycle_pos] = moved_node
+
+        # fill left nodes with corresponding parent 2 nodes
+        for i in range(len(self.nodes_order)):
+            if child_order[i] == -1:
+                child_order[i] = genotype.nodes_order[i]
 
         child_genotype = Genotype()
         child_genotype.nodes_order = child_order

@@ -43,7 +43,7 @@ class Engine:
                 -simple
                 -ox
                 -cx
-                -TODO pmx
+                -pmx
         :param mutation_method: str, option
             Method of mutation
                 -swap
