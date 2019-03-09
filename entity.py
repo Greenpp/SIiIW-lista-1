@@ -127,7 +127,7 @@ class Node:
     Node representing city
 
     position - Coordinates of the city
-    items - Items aviable in the city
+    items - Items available in the city
     """
 
     def __init__(self, x, y):
