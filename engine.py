@@ -25,12 +25,12 @@ class Engine:
     """
     DATA_DIR = 'data/'
 
-    def __init__(self, population_size=100, mutation_ratio=.01, keep_best=True, selection_method='roulette',
+    def __init__(self, population_size=100, mutation_rate=.01, keep_best=True, selection_method='roulette',
                  crossover_method='simple', mutation_method='swap', knapsack_method='greedy', **kwargs):
         """
         :param population_size: int, optional
             Number of entities in population
-        :param mutation_ratio: float, optional
+        :param mutation_rate: float, optional
             Probability of mutation during crossover
         :param keep_best: bool, optional
             If the best entity should be passed to the next generation unchanged
@@ -65,7 +65,7 @@ class Engine:
         """
         self.population_size = population_size
 
-        self.mutation_rate = mutation_ratio
+        self.mutation_rate = mutation_rate
 
         self.keep_best = keep_best
 
@@ -110,7 +110,7 @@ class Engine:
                             'max': [],
                             'avg': []}
 
-    def run(self, generations=None, fitness=None, info_every=None):
+    def run(self, generations=None, fitness=None, info_every=None, visualize_result=False):
         """
         Runs algorithm for n generations or until given fitness is met and plots data at the end
         If neither generations or fitness is given it will run forever
@@ -121,6 +121,8 @@ class Engine:
             Minimal fitness at witch algorithm will be terminated
         :param info_every: int, optional
             At every n-th generation information about number and fitness will be printed
+        :param visualize_result: bool, optional
+            If the best entity should be visualized after termination
         """
         if self.knapsack_method == 'greedy':
             self.greedy_item_select()
@@ -136,6 +138,9 @@ class Engine:
                 break
             self.next_generation()
             generation += 1
+
+        if visualize_result:
+            self.visualize_best()
 
         self.plot_data()
 
@@ -199,6 +204,12 @@ class Engine:
         plt.title(self.problem_name)
 
         plt.show()
+
+    def visualize_best(self):
+        """
+        Visualizes best entity as directed graph
+        """
+        self.population[0].visualize(self.nodes)
 
     def selection(self):
         """

@@ -1,5 +1,8 @@
 from random import random
 
+import networkx as nx
+from matplotlib import pyplot as plt
+
 from genetics import Genotype
 
 
@@ -85,6 +88,38 @@ class Entity:
         child.genotype = child_genotype
 
         return child
+
+    def visualize(self, nodes):
+        """
+        Draws encoded path as directed graph
+
+        Robbed cities are in red, not in blue
+        """
+        edges = self.genotype.decode()
+
+        # partition nodes
+        robbed_cities = []
+        skipped_cities = []
+        for i in self.genotype.nodes_order:
+            if nodes[i].steal() == (0, 0):
+                skipped_cities.append(i)
+            else:
+                robbed_cities.append(i)
+
+        g = nx.DiGraph(edges)
+        layout = nx.circular_layout(g)
+
+        # draw
+        nx.draw_networkx_nodes(g, layout, nodelist=robbed_cities, node_color='r')
+        nx.draw_networkx_nodes(g, layout, nodelist=skipped_cities, node_color='b')
+        nx.draw_networkx_edges(g, layout)
+
+        # add labels
+        labels = {n: n for n in self.genotype.nodes_order}
+        nx.draw_networkx_labels(g, layout, labels)
+
+        plt.axis('off')
+        plt.show()
 
 
 class Node:
