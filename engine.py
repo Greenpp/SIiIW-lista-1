@@ -139,6 +139,9 @@ class Engine:
             self.next_generation()
             generation += 1
 
+        print('{}\nAlgorithm terminated on generation: {}\nFinal fitness: {}'.format(20 * '=', generation,
+                                                                                     self.population[0].fitness))
+
         if visualize_result:
             self.visualize_best()
 
