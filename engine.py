@@ -61,6 +61,7 @@ class Engine:
                     -weight
                     -value
                     -ratio
+            :param fix_seq TODO
 
         """
         self.population_size = population_size
@@ -86,12 +87,18 @@ class Engine:
                 self.greedy_method = 'ratio'
             else:
                 self.greedy_method = kwargs['greedy_method']
-            self.items = []
+            self.items_fix_seq = None
         elif knapsack_method == 'genetic':
-            self.items = None
+            if 'fix_seq' not in kwargs:
+                self.fix_seq = 'ratio'
+            else:
+                self.fix_seq = kwargs['fix_seq']
+            self.items_fix_seq = []
         else:
             print('Knapsack method error')
             exit(1)
+
+        self.items = []
 
         self.problem_name = None
         self.knapsack_data_type = None
@@ -124,9 +131,6 @@ class Engine:
         :param visualize_result: bool, optional
             If the best entity should be visualized after termination
         """
-        if self.knapsack_method == 'greedy':
-            self.greedy_item_select()
-
         self.init()
         generation = 0
         while True:
@@ -151,7 +155,13 @@ class Engine:
         """
         Initializes population with random entities
         """
-        self.population = [Entity(self.nodes_num) for i in range(self.population_size)]
+        if self.knapsack_method == 'greedy':
+            self.greedy_item_select()
+            self.population = [Entity(self.nodes_num) for i in range(self.population_size)]
+        elif self.knapsack_method == 'genetic':
+            self.organize_fix_seq()
+            self.population = [Entity(self.nodes_num, self.items, self.items_fix_seq, self.max_capacity) for i in
+                               range(self.population_size)]
         self.test()
         self.sort()
         self.log_data()
@@ -302,6 +312,21 @@ class Engine:
                 if weight_left == 0:
                     break
 
+    def organize_fix_seq(self):
+        """
+        TODO
+        :return:
+        """
+        if self.fix_seq == 'weight':
+            self.items_fix_seq.sort(key=lambda x: x.weight)
+        elif self.fix_seq == 'value':
+            self.items_fix_seq.sort(key=lambda x: x.value, reverse=True)
+        elif self.fix_seq == 'ratio':
+            self.items_fix_seq.sort(key=lambda x: x.ratio, reverse=True)
+        else:
+            print('Fix sequence method error')
+            exit(1)
+
     def load_data(self, file_name):
         """
         Loads data from given file
@@ -332,13 +357,14 @@ class Engine:
             node = Node(float(x), float(y))
             self.nodes.append(node)
 
-        for item_line in item_lines:
+        for i, item_line in enumerate(item_lines):
             _, profit, weight, node = item_line.split()
 
-            item = Item(int(profit), int(weight))
+            item = Item(int(profit), int(weight), i)
 
-            if self.items is not None:
-                self.items.append(item)
+            self.items.append(item)
+            if self.items_fix_seq is not None:
+                self.items_fix_seq.append(item)
 
             node_id = int(node) - 1
             self.nodes[node_id].add_item(item)

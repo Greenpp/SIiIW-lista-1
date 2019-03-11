@@ -256,3 +256,119 @@ class Genotype:
         child_genotype.nodes_order = child_order
 
         return child_genotype
+
+
+class GenotypeV2(Genotype):
+    """
+    TODO
+    """
+
+    def __init__(self, nodes_num=None, items=None, fix_seq=None, max_weight=None):
+        """
+        TODO
+        :param nodes_num:
+        :param items:
+        :param fix_seq:
+        :param max_weight:
+        """
+        # call super
+        super().__init__(nodes_num)
+
+        self.items = items
+        self.fix_seq = fix_seq
+        self.max_weight = max_weight
+
+        # create random item configuration
+        self.items_cfg = None
+        if items is not None:
+            items_num = len(items)
+            if items_num % 2 == 0:
+                self.items_cfg = items_num // 2 * [0] + items_num // 2 * [1]
+            else:
+                self.items_cfg = items_num // 2 * [0] + (items_num // 2 + 1) * [1]
+
+            random.shuffle(self.items_cfg)
+            self.fix()
+
+    def fix(self):
+        """
+        TODO
+        :return:
+        """
+        # calculate configuration weight
+        weight = 0
+        for item, is_marked in zip(self.items, self.items_cfg):
+            if is_marked:
+                weight += item.weight
+
+        # reduce weight with less valuable items
+        fix_iter = iter(reversed(self.fix_seq))
+        while weight > self.max_weight:
+            item = next(fix_iter)
+            if self.items_cfg[item.id] == 1:
+                weight -= item.weight
+                self.items_cfg[item.id] = 0
+
+    def decode(self):
+        """
+        TODO
+        :return:
+        """
+        # get standard genotype decoded value
+        phenotype = super().decode()
+
+        # decode items configuration
+        for is_marked, item in zip(self.items_cfg, self.items):
+            item.to_steal = is_marked
+
+        return phenotype
+
+    def mutate(self, method='swap'):
+        """
+        TODO
+        :param method:
+        :return:
+        """
+        # mutate standard genotype
+        super().mutate(method)
+
+        # reverse 10% of items and fix
+        mutated_idx = random.sample(range(len(self.items_cfg)), len(self.items_cfg) // 10)
+        for i in mutated_idx:
+            self.items_cfg[i] = 1 if self.items_cfg[i] == 0 else 0
+
+        self.fix()
+
+    def crossover(self, genotype, method='simple'):
+        """
+        TODO
+        :param genotype:
+        :param method:
+        :return:
+        """
+        # get standard genotype
+        standard_child_genotype = super().crossover(genotype, method)
+
+        # create child genotype
+        child_genotype = GenotypeV2()
+        child_genotype.nodes_order = standard_child_genotype.nodes_order
+
+        # get 50% of each parent genetic material
+        child_item_cfg = self.items_cfg[:]
+        for i in range(len(self.items_cfg)):
+            rnd = random.random()
+            if rnd < .5:
+                child_item_cfg[i] = genotype.items_cfg[i]
+
+        child_genotype.items_cfg = child_item_cfg
+
+        # copy data for fixing
+
+        child_genotype.items = self.items
+        child_genotype.fix_seq = self.fix_seq
+        child_genotype.max_weight = self.max_weight
+
+        # fix
+        child_genotype.fix()
+
+        return child_genotype
