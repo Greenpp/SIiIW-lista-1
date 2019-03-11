@@ -100,7 +100,8 @@ class Entity:
         # partition nodes
         robbed_cities = []
         skipped_cities = []
-        for i in self.genotype.nodes_order:
+        first_city = self.genotype.nodes_order[0]
+        for i in self.genotype.nodes_order[1:]:
             if nodes[i].steal() == (0, 0):
                 skipped_cities.append(i)
             else:
@@ -110,6 +111,7 @@ class Entity:
         layout = nx.circular_layout(g)
 
         # draw
+        nx.draw_networkx_nodes(g, layout, nodelist=[first_city], node_color='y')
         nx.draw_networkx_nodes(g, layout, nodelist=robbed_cities, node_color='r')
         nx.draw_networkx_nodes(g, layout, nodelist=skipped_cities, node_color='b')
         nx.draw_networkx_edges(g, layout)
