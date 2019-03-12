@@ -3,7 +3,7 @@ from random import random
 import networkx as nx
 from matplotlib import pyplot as plt
 
-from genetics import Genotype
+from genetics import Genotype, GenotypeV2
 
 
 class Entity:
@@ -14,12 +14,16 @@ class Entity:
     fitness - Score of this path
     """
 
-    def __init__(self, nodes_num=None):
+    def __init__(self, nodes_num=None, items=None, fix_seq=None, max_weight=None):
         """
         :param nodes_num: int, optional
             Total number of nodes
+            TODO
         """
-        self.genotype = None if nodes_num is None else Genotype(nodes_num)
+        if items is None:
+            self.genotype = None if nodes_num is None else Genotype(nodes_num)
+        else:
+            self.genotype = GenotypeV2(nodes_num, items, fix_seq, max_weight)
         self.fitness = None
 
     def test(self, nodes, min_speed, max_speed, max_weight):
@@ -197,15 +201,17 @@ class Item:
     weight - Weight of the item
     ratio - Value/weight ratio
     to_steal - If item will be picked
+    TODO
     """
 
-    def __init__(self, value, weight):
+    def __init__(self, value, weight, item_id):
         """
         :param value: int
             Value of item
         :param weight: int
             Weight of item
         """
+        self.id = item_id
         self.value = value
         self.weight = weight
         self.ratio = value / weight
