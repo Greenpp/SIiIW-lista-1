@@ -25,8 +25,9 @@ class Engine:
     """
     DATA_DIR = 'data/'
 
-    def __init__(self, population_size=100, mutation_rate=.01, keep_best=True, selection_method='roulette',
-                 crossover_method='simple', mutation_method='swap', knapsack_method='greedy', **kwargs):
+    def __init__(self, population_size=100, mutation_rate=.01, keep_best=True, survival_rate=0,
+                 selection_method='roulette', crossover_method='simple', mutation_method='swap',
+                 knapsack_method='greedy', **kwargs):
         """
         :param population_size: int, optional
             Number of entities in population
@@ -34,6 +35,8 @@ class Engine:
             Probability of mutation during crossover
         :param keep_best: bool, optional
             If the best entity should be passed to the next generation unchanged
+        :param survival_rate: float, optional
+            Fraction of old population that will survive to next generation
         :param selection_method: str, optional
             Method of selection
                 -roulette
@@ -68,6 +71,8 @@ class Engine:
         self.mutation_rate = mutation_rate
 
         self.keep_best = keep_best
+
+        self.survival_rate = survival_rate
 
         self.selection_method = selection_method
         if selection_method == 'tournament':
@@ -232,9 +237,18 @@ class Engine:
         """
         new_population = []
 
+        survivors_num = int(self.survival_rate * self.population_size)
+        survivors_pool = self.population
         if self.keep_best:
             # passing best entity unchanged
             new_population.append(self.population[0])
+            survivors_num -= 1
+            survivors_pool = self.population[1:]
+
+        if survivors_num > 0:
+            survivors = random.sample(survivors_pool, survivors_num)
+
+            new_population += survivors
 
         weights = [e.fitness for e in self.population]
 
@@ -261,9 +275,18 @@ class Engine:
         """
         new_population = []
 
+        survivors_num = int(self.survival_rate * self.population_size)
+        survivors_pool = self.population
         if self.keep_best:
             # passing best entity unchanged
             new_population.append(self.population[0])
+            survivors_num -= 1
+            survivors_pool = self.population[1:]
+
+        if survivors_num > 0:
+            survivors = random.sample(survivors_pool, survivors_num)
+
+            new_population += survivors
 
         while len(new_population) < self.population_size:
             # select parents from 2 random tournaments
