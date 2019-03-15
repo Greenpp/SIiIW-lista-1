@@ -22,7 +22,7 @@ class Entity:
         self.genotype = None if nodes_num is None else Genotype(nodes_num)
         self.fitness = None
 
-    def test(self, nodes, min_speed, max_speed, max_weight):
+    def test(self, nodes, min_speed, max_speed, max_weight, greedy_type='static', **kwargs):
         """
         Calculates fitness
 
@@ -40,11 +40,25 @@ class Entity:
             Speed with full bag
         :param max_weight: int
             Capacity of bag
+        :param greedy_type: str, optional
+            Type of greedy item marking
+        :param kwargs:
+            :param greedy_method: str, optional
+                Criteria by which items are picked
+                    -weight
+                    -value
+                    -ratio
         """
         self.fitness = 0
         weight = 0
         path = self.genotype.decode()
-        # TODO add dynamic greedy
+
+        if greedy_type == 'dynamic':
+            if 'greedy_method' not in kwargs:
+                print('Argument greedy_method required for dynamic greedy algorithm')
+                exit(1)
+
+            self.dynamic_greedy(path, nodes, max_weight, kwargs['greedy_method'])
 
         for id1, id2 in path:
             node1 = nodes[id1]
@@ -59,14 +73,18 @@ class Entity:
             self.fitness += city_value
             self.fitness -= time
 
-    def dynamic_greedy(self, path, nodes, max_weight, greedy_method):
+    def dynamic_greedy(self, path, nodes, max_weight, greedy_method='ratio'):
         """
-        TODO
-        :param path:
-        :param nodes:
-        :param max_weight:
-        :param greedy_method:
-        :return:
+        Marks items base on current nodes order
+
+        :param path: list
+            Sequence of nodes for which items should be scaled
+        :param nodes: list
+            List of all nodes
+        :param max_weight: int
+            Capacity of bag
+        :param greedy_method: str, optional
+            Criteria by which items are marked
         """
         # build distance, items list
         distances = []
@@ -98,13 +116,13 @@ class Entity:
                 value = None
                 if greedy_method == 'ratio':
                     value = item.ratio
-                    value *= pair[2]
+                    value *= pair[1]
                 elif greedy_method == 'weight':
                     value = item.weight
-                    value *= (-2 - pair[2])
+                    value *= (-2 - pair[1])
                 elif greedy_method == 'value':
                     value = item.value
-                    value *= pair[2]
+                    value *= pair[1]
 
                 scaled_items.append((item, value))
 

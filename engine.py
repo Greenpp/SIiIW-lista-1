@@ -25,6 +25,9 @@ class Engine:
     """
     DATA_DIR = 'data/'
 
+    # TODO fitness dictionary
+    # TODO optional ratio time/value to test function
+
     def __init__(self, population_size=100, mutation_rate=.01, keep_best=True, survival_rate=0,
                  selection_method='roulette', crossover_method='simple', mutation_method='swap',
                  knapsack_method='greedy', **kwargs):
@@ -35,6 +38,7 @@ class Engine:
             Probability of mutation during crossover
         :param keep_best: bool, optional
             If the best entity should be passed to the next generation unchanged
+            TODO save best if not keeping
         :param survival_rate: float, optional
             Fraction of old population that will survive to next generation
         :param selection_method: str, optional
@@ -67,8 +71,7 @@ class Engine:
             :param greedy_type: str, optional
                 Type of greedy item picking algorithm
                     -static - all items are marked at the beginning
-                    -dynamic - items are being marked for every entity TODO
-
+                    -dynamic - items are being marked for every entity
         """
         self.population_size = population_size
 
@@ -95,6 +98,10 @@ class Engine:
                 self.greedy_method = 'ratio'
             else:
                 self.greedy_method = kwargs['greedy_method']
+            if 'greedy_type' in kwargs:
+                self.greedy_type = kwargs['greedy_type']
+            else:
+                self.greedy_type = 'static'
             self.items = []
         elif knapsack_method == 'genetic':
             self.items = None
@@ -171,7 +178,11 @@ class Engine:
         """
         for entity in self.population:
             if entity.fitness is None:
-                entity.test(self.nodes, self.min_speed, self.max_speed, self.max_capacity)
+                if self.greedy_type == 'static':
+                    entity.test(self.nodes, self.min_speed, self.max_speed, self.max_capacity, self.greedy_type)
+                else:
+                    entity.test(self.nodes, self.min_speed, self.max_speed, self.max_capacity, self.greedy_type,
+                                greedy_method=self.greedy_method)
 
     def sort(self):
         """
@@ -239,6 +250,7 @@ class Engine:
         """
         Creates new population with weighted roulette system to pick parents
         """
+        # TODO e ^ f(xi) / sum(e ^ f(xi))
         new_population = []
 
         survivors_num = int(self.survival_rate * self.population_size)
