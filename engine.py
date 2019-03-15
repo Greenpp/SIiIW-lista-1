@@ -25,7 +25,6 @@ class Engine:
     """
     DATA_DIR = 'data/'
 
-    # TODO fitness dictionary
     # TODO optional ratio time/value to test function
 
     def __init__(self, population_size=100, mutation_rate=.01, keep_best=True, survival_rate=0,
@@ -121,6 +120,7 @@ class Engine:
         self.nodes = []
 
         self.population = []
+        self.fitness_dict = dict()
 
         self.logged_data = {'min': [],
                             'max': [],
@@ -140,7 +140,7 @@ class Engine:
         :param visualize_result: bool, optional
             If the best entity should be visualized after termination
         """
-        if self.knapsack_method == 'greedy':
+        if self.knapsack_method == 'greedy' and self.greedy_type == 'static':
             self.greedy_item_select()
 
         self.init()
@@ -179,10 +179,11 @@ class Engine:
         for entity in self.population:
             if entity.fitness is None:
                 if self.greedy_type == 'static':
-                    entity.test(self.nodes, self.min_speed, self.max_speed, self.max_capacity, self.greedy_type)
+                    entity.test(self.nodes, self.min_speed, self.max_speed, self.max_capacity, self.fitness_dict,
+                                self.greedy_type)
                 else:
-                    entity.test(self.nodes, self.min_speed, self.max_speed, self.max_capacity, self.greedy_type,
-                                greedy_method=self.greedy_method)
+                    entity.test(self.nodes, self.min_speed, self.max_speed, self.max_capacity, self.fitness_dict,
+                                self.greedy_type, greedy_method=self.greedy_method)
 
     def sort(self):
         """

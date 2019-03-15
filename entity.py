@@ -22,7 +22,7 @@ class Entity:
         self.genotype = None if nodes_num is None else Genotype(nodes_num)
         self.fitness = None
 
-    def test(self, nodes, min_speed, max_speed, max_weight, greedy_type='static', **kwargs):
+    def test(self, nodes, min_speed, max_speed, max_weight, fitness_dict, greedy_type='static', **kwargs):
         """
         Calculates fitness
 
@@ -40,6 +40,8 @@ class Entity:
             Speed with full bag
         :param max_weight: int
             Capacity of bag
+        :param fitness_dict: dict
+            Dictionary mapping genes sequence -> fitness value
         :param greedy_type: str, optional
             Type of greedy item marking
         :param kwargs:
@@ -50,6 +52,13 @@ class Entity:
                     -ratio
         """
         self.fitness = 0
+
+        fitness_key = self.genotype.create_key()
+        if fitness_key in fitness_dict:
+            # if already calculated read value
+            self.fitness = fitness_dict[fitness_key]
+            return
+
         weight = 0
         path = self.genotype.decode()
 
@@ -72,6 +81,9 @@ class Entity:
 
             self.fitness += city_value
             self.fitness -= time
+
+        # save new value
+        fitness_dict[fitness_key] = self.fitness
 
     def dynamic_greedy(self, path, nodes, max_weight, greedy_method='ratio'):
         """

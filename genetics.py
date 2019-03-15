@@ -17,6 +17,15 @@ class Genotype:
         if nodes_num is not None:
             random.shuffle(self.nodes_order)
 
+    def create_key(self):
+        """
+        Creates key for fitness dictionary
+
+        :return: tuple
+            Tuple of nodes order
+        """
+        return tuple(self.nodes_order)
+
     def decode(self):
         """
         Decodes genotype to phenotype
