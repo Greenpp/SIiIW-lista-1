@@ -178,7 +178,7 @@ class Engine:
         """
         Updates best found entity, used when best can be mutated/lost
         """
-        if self.best_entity.fitness < self.population[0].fitness:
+        if self.best_entity is None or self.best_entity.fitness < self.population[0].fitness:
             self.best_entity = self.population[0].copy()
 
     def test(self):
