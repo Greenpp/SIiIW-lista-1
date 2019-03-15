@@ -1,9 +1,9 @@
+import math
 import random
 
 from matplotlib import pyplot as plt
 
 from entity import Node, Item, Entity
-import math
 
 
 class Engine:
@@ -26,8 +26,6 @@ class Engine:
     """
     DATA_DIR = 'data/'
 
-    # TODO optional ratio time/value to test function
-
     def __init__(self, population_size=100, mutation_rate=.01, keep_best=True, survival_rate=0,
                  selection_method='roulette', crossover_method='simple', mutation_method='swap',
                  knapsack_method='greedy', **kwargs):
@@ -38,7 +36,6 @@ class Engine:
             Probability of mutation during crossover
         :param keep_best: bool, optional
             If the best entity should be passed to the next generation unchanged
-            TODO save best if not keeping
         :param survival_rate: float, optional
             Fraction of old population that will survive to next generation
         :param selection_method: str, optional
@@ -122,6 +119,7 @@ class Engine:
 
         self.population = []
         self.fitness_dict = dict()
+        self.best_entity = None
 
         self.logged_data = {'min': [],
                             'max': [],
@@ -156,8 +154,9 @@ class Engine:
             self.next_generation()
             generation += 1
 
+        best_fitness = self.population[0].fitness if self.keep_best else self.best_entity.fitness
         print('{}\nAlgorithm terminated on generation: {}\nFinal fitness: {}'.format(20 * '=', generation,
-                                                                                     self.population[0].fitness))
+                                                                                     best_fitness))
 
         if visualize_result:
             self.visualize_best()
@@ -171,7 +170,16 @@ class Engine:
         self.population = [Entity(self.nodes_num) for i in range(self.population_size)]
         self.test()
         self.sort()
+        if not self.keep_best:
+            self.update_best()
         self.log_data()
+
+    def update_best(self):
+        """
+        Updates best found entity, used when best can be mutated/lost
+        """
+        if self.best_entity.fitness < self.population[0].fitness:
+            self.best_entity = self.population[0].copy()
 
     def test(self):
         """

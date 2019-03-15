@@ -17,6 +17,18 @@ class Genotype:
         if nodes_num is not None:
             random.shuffle(self.nodes_order)
 
+    def copy(self):
+        """
+        Creates copy of genotype
+
+        :return: Genotype
+            Copy
+        """
+        cp = Genotype()
+        cp.nodes_order = self.nodes_order.copy()
+
+        return cp
+
     def create_key(self):
         """
         Creates key for fitness dictionary

@@ -22,6 +22,19 @@ class Entity:
         self.genotype = None if nodes_num is None else Genotype(nodes_num)
         self.fitness = None
 
+    def copy(self):
+        """
+        Creates copy of entity
+
+        :return: Entity
+            Copy
+        """
+        cp = Entity()
+        cp.genotype = self.genotype.copy()
+        cp.fitness = self.fitness
+
+        return cp
+
     def test(self, nodes, min_speed, max_speed, max_weight, fitness_dict, greedy_type='static', **kwargs):
         """
         Calculates fitness
