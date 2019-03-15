@@ -30,7 +30,7 @@ class Entity:
             g(y) - f(x, y)
         Where:
             g(y) - sum of stolen items
-            f(x, y) - total time of traversal
+            f(x, y) - total time of travers
 
         :param nodes: list
             List of all nodes

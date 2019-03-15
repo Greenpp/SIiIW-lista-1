@@ -3,6 +3,7 @@ import random
 from matplotlib import pyplot as plt
 
 from entity import Node, Item, Entity
+import math
 
 
 class Engine:
@@ -251,7 +252,6 @@ class Engine:
         """
         Creates new population with weighted roulette system to pick parents
         """
-        # TODO e ^ f(xi) / sum(e ^ f(xi))
         new_population = []
 
         survivors_num = int(self.survival_rate * self.population_size)
@@ -269,13 +269,22 @@ class Engine:
 
         weights = [e.fitness for e in self.population]
 
-        # shift to avoid negative values
-        min_weight = min(weights)
-        shifted_weights = [w - min_weight + 1 for w in weights]
+        # # shift to avoid negative values
+        # min_weight = min(weights)
+        # shifted_weights = [w - min_weight + 1 for w in weights]
+        #
+        # # normalization
+        # weight_sum = sum(shifted_weights)
+        # norm_weights = [w / weight_sum for w in shifted_weights]
 
-        # normalization
-        weight_sum = sum(shifted_weights)
-        norm_weights = [w / weight_sum for w in shifted_weights]
+        # softmax
+        # max for stability
+        max_w = max(weights)
+        norm_weights = [math.e ** (w - max_w) for w in weights]
+
+        denominator = sum(norm_weights)
+        for i in range(len(norm_weights)):
+            norm_weights[i] /= denominator
 
         # mating
         while len(new_population) < self.population_size:
