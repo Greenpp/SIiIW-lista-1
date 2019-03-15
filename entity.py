@@ -44,6 +44,7 @@ class Entity:
         self.fitness = 0
         weight = 0
         path = self.genotype.decode()
+        # TODO add dynamic greedy
 
         for id1, id2 in path:
             node1 = nodes[id1]
@@ -57,6 +58,72 @@ class Entity:
 
             self.fitness += city_value
             self.fitness -= time
+
+    def dynamic_greedy(self, path, nodes, max_weight, greedy_method):
+        """
+        TODO
+        :param path:
+        :param nodes:
+        :param max_weight:
+        :param greedy_method:
+        :return:
+        """
+        # build distance, items list
+        distances = []
+        total_distance = 0
+        for id1, id2 in path:
+            node1 = nodes[id1]
+            node2 = nodes[id2]
+
+            distance = node1.calculate_distance_to(node2)
+            items = node1.items
+
+            total_distance += distance
+
+            distances.append([items, distance])
+
+        # sum from finish to get total distance foe each item
+        distances.reverse()
+        for i in range(len(distances) - 1):
+            distances[i + 1][1] += distances[i][1]
+
+        # normalize for scaling and shift to avoid 0
+        for pair in distances:
+            pair[1] = 1 - (pair[1] / total_distance) + 1
+
+        # create item, weighted value list
+        scaled_items = []
+        for pair in distances:
+            for item in pair[0]:
+                value = None
+                if greedy_method == 'ratio':
+                    value = item.ratio
+                    value *= pair[2]
+                elif greedy_method == 'weight':
+                    value = item.weight
+                    value *= (-2 - pair[2])
+                elif greedy_method == 'value':
+                    value = item.value
+                    value *= pair[2]
+
+                scaled_items.append((item, value))
+
+        # sort
+        if greedy_method == 'ratio':
+            scaled_items.sort(key=lambda x: x[1], reverse=True)
+        elif greedy_method == 'weight':
+            scaled_items.sort(key=lambda x: x[1])
+        elif greedy_method == 'value':
+            scaled_items.sort(key=lambda x: x[1], reverse=True)
+
+        # greedy mark items
+        weight_left = max_weight
+        for item, _ in scaled_items:
+            if item.weight <= weight_left:
+                item.to_steal = True
+                weight_left -= item.weight
+            else:
+                item.to_steal = False
 
     def mate(self, entity, mutation_rate=.01, crossover_method='simple', mutation_method='swap'):
         """
@@ -152,6 +219,22 @@ class Node:
         """
         self.items.append(item)
 
+    def calculate_distance_to(self, node):
+        """
+        Calculates distance to another node
+
+        :param node: Node
+            Other node
+        :return: float
+            Distance
+        """
+        x1, y1 = self.position
+        x2, y2 = node.position
+
+        distance = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** .5
+
+        return distance
+
     def calculate_time_to(self, node, speed):
         """
         Calculates time it takes to get from this node to another with given speed
@@ -163,10 +246,7 @@ class Node:
         :return: float
             Time
         """
-        x1, y1 = self.position
-        x2, y2 = node.position
-
-        distance = ((x2 - x1) ** 2 + (y2 - y1) ** 2) ** .5
+        distance = self.calculate_distance_to(node)
 
         time = distance / speed
 

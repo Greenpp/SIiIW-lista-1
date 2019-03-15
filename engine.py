@@ -64,6 +64,10 @@ class Engine:
                     -weight
                     -value
                     -ratio
+            :param greedy_type: str, optional
+                Type of greedy item picking algorithm
+                    -static - all items are marked at the beginning
+                    -dynamic - items are being marked for every entity TODO
 
         """
         self.population_size = population_size
