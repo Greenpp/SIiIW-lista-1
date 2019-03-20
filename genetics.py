@@ -58,7 +58,8 @@ class Genotype:
             Name of the mutation
         """
         mutations = {'swap': self.mutation_swap,
-                     'inverse': self.mutation_inverse}
+                     'inverse': self.mutation_inverse,
+                     'shuffle': self.mutation_shuffle}
 
         if method not in mutations:
             print('Mutation type error')
@@ -87,6 +88,18 @@ class Genotype:
         # inverse <pos1, pos2>
         for i, v in zip(range(pos2 - pos1 + 1), reversed(self.nodes_order[pos1:pos2 + 1])):
             self.nodes_order[pos1 + i] = v
+
+    def mutation_shuffle(self):
+        """
+        Mutation shuffles random fragment of genome
+        """
+        # fragment to shuffle
+        pos1, pos2 = sorted(random.sample(range(len(self.nodes_order)), 2))
+
+        fragment = self.nodes_order[pos1:pos2]
+        random.shuffle(fragment)
+
+        self.nodes_order[pos1:pos2] = fragment
 
     def crossover(self, genotype, method='simple'):
         """
