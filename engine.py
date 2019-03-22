@@ -106,6 +106,11 @@ class Engine:
             print('Knapsack method error')
             exit(1)
 
+        if 'generations' in kwargs:
+            self.generations = kwargs['generations']
+        else:
+            self.generations = None
+
         self.problem_name = None
         self.knapsack_data_type = None
         self.nodes_num = None
@@ -141,6 +146,9 @@ class Engine:
         """
         if self.knapsack_method == 'greedy' and self.greedy_type == 'static':
             self.greedy_item_select()
+
+        if self.generations is not None:
+            generations = self.generations
 
         self.init()
         generation = 0
