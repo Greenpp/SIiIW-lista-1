@@ -26,8 +26,8 @@ class Engine:
     """
     DATA_DIR = 'data/'
 
-    def __init__(self, population_size=100, mutation_rate=.01, keep_best=True, survival_rate=0,
-                 selection_method='roulette', crossover_method='simple', mutation_method='swap',
+    def __init__(self, population_size=100, mutation_rate=.8, keep_best=True, survival_rate=.5,
+                 selection_method='tournament', crossover_method='pmx', mutation_method='inverse',
                  knapsack_method='greedy', **kwargs):
         """
         :param population_size: int, optional
@@ -81,7 +81,7 @@ class Engine:
         self.selection_method = selection_method
         if selection_method == 'tournament':
             if 'tournament_size' not in kwargs:
-                self.tournament_size = int(population_size * 8 / 100)
+                self.tournament_size = 15
             else:
                 self.tournament_size = kwargs['tournament_size']
 
@@ -222,6 +222,14 @@ class Engine:
         self.logged_data['min'].append(min_fitness)
         self.logged_data['max'].append(max_fitness)
         self.logged_data['avg'].append(avg_fitness)
+
+    def clear_logs(self):
+        """
+        Clears collected data
+        """
+        self.logged_data = {'min': [],
+                            'max': [],
+                            'avg': []}
 
     def plot_data(self):
         """
