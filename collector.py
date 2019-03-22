@@ -125,8 +125,12 @@ class Test:
         :return: bool
             If names are correct
         """
-        # TODO test names
-        pass
+        if self.parameters is not None:
+            for name in self.parameters.keys():
+                if not hasattr(self.engine, name):
+                    return False
+
+        return hasattr(self.engine, self.mutable_param)
 
     def run_next(self):
         """
