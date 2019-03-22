@@ -168,8 +168,7 @@ class Engine:
 
         if visualize_result:
             self.visualize_best()
-
-        self.plot_data()
+            self.plot_data()
 
     def init(self):
         """
