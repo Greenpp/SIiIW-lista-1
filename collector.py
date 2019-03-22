@@ -1,5 +1,3 @@
-from os.path import isfile
-
 import sqlalchemy as sql
 
 from engine import Engine
@@ -10,16 +8,14 @@ class Collector:
     Data collector
     """
 
-    DATA_DIR = 'data/'
-
-    def __init__(self, file_name, db_name='test_results'):
+    def __init__(self, file_name, db_name='genetic_data'):
         """
         :param file_name: str
             Name of data file
         :param db_name: str, optional
             Name of database
         """
-        self.db_name = db_name + '.db'
+        self.db_name = db_name
         self.data_file = file_name
 
         self.engine = Engine()
@@ -32,7 +28,6 @@ class Collector:
         Initializes database connection and loads data from given data file
         """
         self.engine.load_data(self.data_file)
-        self.create_db()
         self.connect_to_db()
 
     def run(self):
@@ -47,6 +42,13 @@ class Collector:
                     self.push_data_into_db()
                     self.engine.clear_logs()
 
+    def close(self):
+        """
+        Closes db connection
+        """
+        if self.connection is not None:
+            self.connection.close()
+
     def add_test(self, test):
         """
         Adds new test for collector
@@ -56,21 +58,13 @@ class Collector:
         """
         self.tests.append(test)
 
-    def create_db(self):
-        """
-        Creates db if doesnt exists
-        """
-        if not isfile(self.DATA_DIR + self.db_name):
-            # TODO create db if doesnt exist
-            pass
-
     def connect_to_db(self):
         """
-        Connects to existing db
-        """
-        db_path = self.DATA_DIR + self.db_name
+        Connects to existing db on mariadb local sever
 
-        self.connection = sql.create_engine('sqlite:///' + db_path).connect()
+        Requires manual server setup
+        """
+        self.connection = sql.create_engine('mysql+mysqldb://collector:1234@localhost:0/' + self.db_name)
 
     def push_data_into_db(self):
         """
