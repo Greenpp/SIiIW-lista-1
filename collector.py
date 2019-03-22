@@ -1,6 +1,8 @@
-from engine import Engine
-import sqlalchemy as sql
 from os.path import isfile
+
+import sqlalchemy as sql
+
+from engine import Engine
 
 
 class Collector:
@@ -11,6 +13,12 @@ class Collector:
     DATA_DIR = 'data/'
 
     def __init__(self, file_name, db_name='test_results'):
+        """
+        :param file_name: str
+            Name of data file
+        :param db_name: str, optional
+            Name of database
+        """
         self.db_name = db_name + '.db'
         self.data_file = file_name
 
@@ -32,8 +40,21 @@ class Collector:
         Executes tests and saves results to db
         """
         for test in self.tests:
-            # TODO execute test
-            pass
+            test.assign_engine(self.engine)
+            test.configure()
+            if test.test_names():
+                while test.run_next():
+                    self.push_data_into_db()
+                    self.engine.clear_logs()
+
+    def add_test(self, test):
+        """
+        Adds new test for collector
+
+        :param test: Test
+            Test to add
+        """
+        self.tests.append(test)
 
     def create_db(self):
         """
@@ -57,3 +78,70 @@ class Collector:
         """
         # TODO push data into db
         pass
+
+
+class Test:
+    """
+    Configures engine parameters
+    """
+
+    def __init__(self, mutable_param, values, parameters=None):
+        """
+
+        :param mutable_param: str
+            Name of parameter to test
+        :param values: list
+            List of values to test
+        :param parameters: dict, optional
+            Dictionary of immutable parameters values for this test
+        """
+        self.mutable_param = mutable_param
+        self.values = list(values)
+        self.parameters = parameters
+
+        self.engine = None
+
+    def assign_engine(self, engine):
+        """
+        Assigns engine to run tests on
+
+        :param engine: Engine
+            Engine to run tests on
+        """
+        self.engine = engine
+
+    def configure(self):
+        """
+        Applies initial parameters to engine
+        """
+        if self.parameters is not None:
+            for name, value in self.parameters.item():
+                setattr(self.engine, name, value)
+
+    def test_names(self):
+        """
+        Test if given parameters names are correct
+
+        :return: bool
+            If names are correct
+        """
+        # TODO test names
+        pass
+
+    def run_next(self):
+        """
+        Executes test for next value
+
+        :return: bool
+            True if test was executed
+            False if there is no more values to test
+        """
+        if len(self.values) == 0:
+            return False
+
+        value = self.values.pop()
+        setattr(self.engine, self.mutable_param, value)
+
+        self.engine.run()
+
+        return True
