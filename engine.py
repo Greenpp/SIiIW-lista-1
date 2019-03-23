@@ -52,6 +52,7 @@ class Engine:
             Method of mutation
                 -swap
                 -inverse
+                -shuffle
         :param knapsack_method: str, optional
             Method of item selection
                 -greedy - greedy algorithm, same items for all entities
@@ -109,7 +110,7 @@ class Engine:
         if 'generations' in kwargs:
             self.generations = kwargs['generations']
         else:
-            self.generations = None
+            self.generations = 100
 
         self.problem_name = None
         self.knapsack_data_type = None
@@ -147,26 +148,25 @@ class Engine:
         if self.knapsack_method == 'greedy' and self.greedy_type == 'static':
             self.greedy_item_select()
 
-        if self.generations is not None:
-            generations = self.generations
+        if generations is not None:
+            self.generations = generations
 
         self.init()
         generation = 0
         while True:
             if info_every is not None and generation % info_every == 0:
                 print('Generation: {}\nFitness: {}'.format(generation, self.population[0].fitness))
-            if generations is not None and generation == generations:
+            if generations is not None and generation == self.generations:
                 break
             if fitness is not None and self.population[0].fitness >= fitness:
                 break
             self.next_generation()
             generation += 1
 
-        best_fitness = self.population[0].fitness if self.keep_best else self.best_entity.fitness
-        print('{}\nAlgorithm terminated on generation: {}\nFinal fitness: {}'.format(20 * '=', generation,
-                                                                                     best_fitness))
-
         if visualize_result:
+            best_fitness = self.population[0].fitness if self.keep_best else self.best_entity.fitness
+            print('{}\nAlgorithm terminated on generation: {}\nFinal fitness: {}'.format(20 * '=', generation,
+                                                                                         best_fitness))
             self.visualize_best()
             self.plot_data()
 
