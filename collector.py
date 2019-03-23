@@ -120,6 +120,8 @@ class Test:
         if self.desc is None:
             self.desc = 'Test of {} with values:\n{}'.format(mutable_param, self.values)
 
+        self.desc.replace('\'', '')
+
         self.engine = None
         self.exp_id = None
 
