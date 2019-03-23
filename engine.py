@@ -228,14 +228,15 @@ class Engine:
         max_fitness = max(fitness_data)
         avg_fitness = sum(fitness_data) / len(fitness_data)
 
-        self.logged_data['min'].append(min_fitness)
-        self.logged_data['max'].append(max_fitness)
-        self.logged_data['avg'].append(avg_fitness)
+        self.logged_data['min'].append(round(min_fitness, 4))
+        self.logged_data['max'].append(round(max_fitness, 4))
+        self.logged_data['avg'].append(round(avg_fitness, 4))
 
     def clear_logs(self):
         """
         Clears collected data
         """
+        self.fitness_dict = dict()
         self.logged_data = {'min': [],
                             'max': [],
                             'avg': []}
@@ -293,14 +294,6 @@ class Engine:
             new_population += survivors
 
         weights = [e.fitness for e in self.population]
-
-        # # shift to avoid negative values
-        # min_weight = min(weights)
-        # shifted_weights = [w - min_weight + 1 for w in weights]
-        #
-        # # normalization
-        # weight_sum = sum(shifted_weights)
-        # norm_weights = [w / weight_sum for w in shifted_weights]
 
         # softmax
         # max for stability
