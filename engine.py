@@ -150,13 +150,15 @@ class Engine:
 
         if generations is not None:
             self.generations = generations
+        else:
+            generations = self.generations
 
         self.init()
         generation = 0
         while True:
             if info_every is not None and generation % info_every == 0:
                 print('Generation: {}\nFitness: {}'.format(generation, self.population[0].fitness))
-            if generations is not None and generation == self.generations:
+            if generations is not None and generation == generations:
                 break
             if fitness is not None and self.population[0].fitness >= fitness:
                 break

@@ -18,7 +18,7 @@
 from collector import Collector, Test
 
 SAMPLE_SIZE = 10
-PARAMS = {'generations': 200}
+PARAMS = {'generations': 250}
 
 
 def distribute_test(cols, t):
@@ -32,7 +32,8 @@ ce = Collector('easy_0.ttp')
 cm = Collector('medium_0.ttp')
 ch = Collector('hard_0.ttp')
 
-collectors = [ct, ce, cm, ch]
+# TODO hard
+collectors = [ct, ce, cm]
 
 # create tests
 
@@ -56,6 +57,22 @@ test_tour = Test(mutable_param='tournament_size',
                  values=([1] + list(range(10, 101, 10))),
                  sample=SAMPLE_SIZE,
                  parameters=PARAMS)
+test_pop = Test(mutable_param='population_size',
+                values=range(100, 1001, 100),
+                sample=SAMPLE_SIZE,
+                parameters=PARAMS)
+test_sel = Test(mutable_param='selection_method',
+                values=['tournament', 'roulette'],
+                sample=SAMPLE_SIZE,
+                parameters=PARAMS)
+test_mut_met = Test(mutable_param='mutation_method',
+                    values=['swap', 'inverse', 'shuffle'],
+                    sample=SAMPLE_SIZE,
+                    parameters=PARAMS)
+test_gen = Test(mutable_param='generations',
+                values=range(100, 1001, 100),
+                sample=SAMPLE_SIZE,
+                parameters=dict())
 
 # distribute tests
 distribute_test(collectors, test_mut)
@@ -63,6 +80,10 @@ distribute_test(collectors, test_surv)
 distribute_test(collectors, test_cros_met)
 distribute_test(collectors, test_greed)
 distribute_test(collectors, test_tour)
+distribute_test(collectors, test_pop)
+distribute_test(collectors, test_sel)
+distribute_test(collectors, test_mut_met)
+distribute_test(collectors, test_gen)
 
 # estimate execution time
 total_time = 0
