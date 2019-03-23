@@ -113,14 +113,15 @@ class Test:
             Dictionary of immutable parameters values for this test
         """
         self.mutable_param = mutable_param
-        self.values = list(values) * sample
-        self.parameters = parameters
+        self.values = list(values)
 
         self.desc = desc
         if self.desc is None:
             self.desc = 'Test of {} with values:\n{}'.format(mutable_param, self.values)
+        self.desc = self.desc.replace('\'', '')
 
-        self.desc.replace('\'', '')
+        self.values *= sample
+        self.parameters = parameters
 
         self.engine = None
         self.exp_id = None
