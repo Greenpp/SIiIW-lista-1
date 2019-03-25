@@ -117,7 +117,7 @@ class Test:
 
         self.desc = desc
         if self.desc is None:
-            self.desc = 'Test of {} with values:\n{}'.format(mutable_param, self.values)
+            self.desc = 'Test of {} with values:\n{}\nParams: {}'.format(mutable_param, self.values, parameters)
         self.desc = self.desc.replace('\'', '')
 
         self.values *= sample
@@ -164,24 +164,26 @@ class Test:
             DB connection
         """
         pop_size = self.engine.population_size
-        gen_num = self.engine.generations
         mut_rate = self.engine.mutation_rate
-        surv_rate = self.engine.survival_rate
         keep_best = 1 if self.engine.keep_best else 0
+        surv_rate = self.engine.survival_rate
         sel_meth = self.engine.selection_method
+        cros_meth = self.engine.crossover_method
         mut_meth = self.engine.mutation_method
         greed_type = self.engine.greedy_type
         tour_size = self.engine.tournament_size if sel_meth == 'tournament' else -1
+        gen_num = self.engine.generations
         f_num = len(self.engine.fitness_dict)
 
-        param_query = 'INSERT INTO `Tests` ' \
-                      '(pop_size, gen_num, mut_rate, surv_rate, keep_best, ' \
-                      'sel_meth, mut_meth, greed_type, tour_size, f_num, id_EXP)' \
-                      'VALUES ' \
-                      '({}, {}, {}, {}, {}, \'{}\', \'{}\', \'{}\', {}, {}, {})'.format(pop_size, gen_num, mut_rate,
-                                                                                        surv_rate, keep_best, sel_meth,
-                                                                                        mut_meth, greed_type, tour_size,
-                                                                                        f_num, self.exp_id)
+        param_query = 'INSERT INTO `Tests`' \
+                      '(pop_size, mut_rate, keep_best, surv_rate, sel_meth, cros_meth, mut_meth, greed_type,' \
+                      'tour_size, gen_num, f_num, id_EXP) VALUES' \
+                      '({},{},{},{},\'{}\',\'{}\',\'{}\',\'{}\',{},{},{},{})'.format(pop_size, mut_rate, keep_best,
+                                                                                     surv_rate, sel_meth,
+                                                                                     cros_meth, mut_meth, greed_type,
+                                                                                     tour_size,
+                                                                                     gen_num, f_num,
+                                                                                     self.exp_id)
 
         result = db_conn.execute(param_query)
         test_id = result.lastrowid
