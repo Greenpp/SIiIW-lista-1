@@ -63,8 +63,6 @@ class Engine:
         :param knapsack_method: str, optional
             Method of item selection
                 -greedy - greedy algorithm, same items for all entities
-                -genetic - items are encoded into entity genome and optimized alongside with path TODO
-
         :param kwargs:
             :param tournament_size: int, optional
                 Number of randomly picked entities for tournaments
