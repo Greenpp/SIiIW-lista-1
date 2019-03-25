@@ -38,6 +38,7 @@ class Collector:
         for i, test in enumerate(self.tests):
             print('Executing test {}/{}'.format(i + 1, test_num))
             test.assign_engine(self.engine)
+            self.engine.reset_to_default()
             test.configure()
             test.push_exp_data(self.connection, self.data_file)
             if test.test_names():
