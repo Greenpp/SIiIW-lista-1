@@ -3,7 +3,7 @@ import random
 
 from matplotlib import pyplot as plt
 
-from entity import Node, Item, Entity
+from entity import Entity, Item, Node
 
 
 class Engine:
@@ -26,9 +26,16 @@ class Engine:
     """
     DATA_DIR = 'data/'
 
-    def __init__(self, population_size=100, mutation_rate=.8, keep_best=True, survival_rate=.5,
-                 selection_method='tournament', crossover_method='pmx', mutation_method='inverse',
-                 knapsack_method='greedy', **kwargs):
+    def __init__(self,
+                 population_size=100,
+                 mutation_rate=.8,
+                 keep_best=True,
+                 survival_rate=.5,
+                 selection_method='tournament',
+                 crossover_method='pmx',
+                 mutation_method='inverse',
+                 knapsack_method='greedy',
+                 **kwargs):
         """
         :param population_size: int, optional
             Number of entities in population
@@ -127,11 +134,13 @@ class Engine:
         self.fitness_dict = dict()
         self.best_entity = None
 
-        self.logged_data = {'min': [],
-                            'max': [],
-                            'avg': []}
+        self.logged_data = {'min': [], 'max': [], 'avg': []}
 
-    def run(self, generations=None, fitness=None, info_every=None, visualize_result=False):
+    def run(self,
+            generations=None,
+            fitness=None,
+            info_every=None,
+            visualize_result=False):
         """
         Runs algorithm for n generations or until given fitness is met and plots data at the end
         If neither generations or fitness is given it will run forever
@@ -157,7 +166,8 @@ class Engine:
         generation = 0
         while True:
             if info_every is not None and generation % info_every == 0:
-                print('Generation: {}\nFitness: {}'.format(generation, self.population[0].fitness))
+                print('Generation: {}\nFitness: {}'.format(
+                    generation, self.population[0].fitness))
             if generations is not None and generation == generations:
                 break
             if fitness is not None and self.population[0].fitness >= fitness:
@@ -166,9 +176,11 @@ class Engine:
             generation += 1
 
         if visualize_result:
-            best_fitness = self.population[0].fitness if self.keep_best else self.best_entity.fitness
-            print('{}\nAlgorithm terminated on generation: {}\nFinal fitness: {}'.format(20 * '=', generation,
-                                                                                         best_fitness))
+            best_fitness = self.population[
+                0].fitness if self.keep_best else self.best_entity.fitness
+            print(
+                '{}\nAlgorithm terminated on generation: {}\nFinal fitness: {}'
+                .format(20 * '=', generation, best_fitness))
             self.visualize_best()
             self.plot_data()
 
@@ -176,7 +188,9 @@ class Engine:
         """
         Initializes population with random entities
         """
-        self.population = [Entity(self.nodes_num) for i in range(self.population_size)]
+        self.population = [
+            Entity(self.nodes_num) for i in range(self.population_size)
+        ]
         self.test()
         self.sort()
         if not self.keep_best:
@@ -187,7 +201,8 @@ class Engine:
         """
         Updates best found entity, used when best can be mutated/lost
         """
-        if self.best_entity is None or self.best_entity.fitness < self.population[0].fitness:
+        if self.best_entity is None or self.best_entity.fitness < self.population[
+                0].fitness:
             self.best_entity = self.population[0].copy()
 
     def test(self):
@@ -197,11 +212,18 @@ class Engine:
         for entity in self.population:
             if entity.fitness is None:
                 if self.greedy_type == 'static':
-                    entity.test(self.nodes, self.min_speed, self.max_speed, self.max_capacity, self.fitness_dict,
+                    entity.test(self.nodes, self.min_speed, self.max_speed,
+                                self.max_capacity, self.fitness_dict,
                                 self.greedy_type)
                 else:
-                    entity.test(self.nodes, self.min_speed, self.max_speed, self.max_capacity, self.fitness_dict,
-                                self.greedy_type, greedy_method=self.greedy_method)
+                    entity.test(
+                        self.nodes,
+                        self.min_speed,
+                        self.max_speed,
+                        self.max_capacity,
+                        self.fitness_dict,
+                        self.greedy_type,
+                        greedy_method=self.greedy_method)
 
     def sort(self):
         """
@@ -237,9 +259,26 @@ class Engine:
         Clears collected data
         """
         self.fitness_dict = dict()
-        self.logged_data = {'min': [],
-                            'max': [],
-                            'avg': []}
+        self.logged_data = {'min': [], 'max': [], 'avg': []}
+
+    def reset_to_default(self):
+        """
+        Resets engine
+        """
+
+        self.population_size = 100
+        self.mutation_rate = .8
+        self.keep_best = True
+        self.survival_rate = .5
+        self.selection_method = 'tournament'
+        self.crossover_method = 'pmx'
+        self.mutation_method = 'inverse'
+        self.knapsack_method = 'greedy'
+        self.tournament_size = 15
+        self.generations = 100
+        self.greedy_method = 'ratio'
+
+        self.clear_logs()
 
     def plot_data(self):
         """
@@ -298,7 +337,7 @@ class Engine:
         # softmax
         # max for stability
         max_w = max(weights)
-        norm_weights = [math.e ** (w - max_w) for w in weights]
+        norm_weights = [math.e**(w - max_w) for w in weights]
 
         denominator = sum(norm_weights)
         for i in range(len(norm_weights)):
@@ -308,7 +347,8 @@ class Engine:
         while len(new_population) < self.population_size:
             p1, p2 = random.choices(self.population, weights=norm_weights, k=2)
 
-            child = p1.mate(p2, self.mutation_rate, self.crossover_method, self.mutation_method)
+            child = p1.mate(p2, self.mutation_rate, self.crossover_method,
+                            self.mutation_method)
             new_population.append(child)
 
         self.population = new_population
@@ -334,10 +374,15 @@ class Engine:
 
         while len(new_population) < self.population_size:
             # select parents from 2 random tournaments
-            p1 = max(random.sample(self.population, self.tournament_size), key=lambda x: x.fitness)
-            p2 = max(random.sample(self.population, self.tournament_size), key=lambda x: x.fitness)
+            p1 = max(
+                random.sample(self.population, self.tournament_size),
+                key=lambda x: x.fitness)
+            p2 = max(
+                random.sample(self.population, self.tournament_size),
+                key=lambda x: x.fitness)
 
-            child = p1.mate(p2, self.mutation_rate, self.crossover_method, self.mutation_method)
+            child = p1.mate(p2, self.mutation_rate, self.crossover_method,
+                            self.mutation_method)
             new_population.append(child)
 
         self.population = new_population
@@ -380,18 +425,33 @@ class Engine:
         with open(data_path) as f:
             lines = list(f)
 
-        self.problem_name = lines[0].split(':')[1].replace('\t', '').replace('\n', '')
-        self.knapsack_data_type = lines[1].split(':')[1].replace('\t', '').replace('\n', '')
-        self.nodes_num = int(lines[2].split(':')[1].replace('\t', '').replace('\n', ''))
-        self.items_num = int(lines[3].split(':')[1].replace('\t', '').replace('\n', ''))
-        self.max_capacity = int(lines[4].split(':')[1].replace('\t', '').replace('\n', ''))
-        self.min_speed = float(lines[5].split(':')[1].replace('\t', '').replace('\n', ''))
-        self.max_speed = float(lines[6].split(':')[1].replace('\t', '').replace('\n', ''))
-        self.renting_ratio = float(lines[7].split(':')[1].replace('\t', '').replace('\n', ''))
-        self.edge_weight_type = lines[8].split(':')[1].replace('\t', '').replace('\n', '')
+        self.problem_name = lines[0].split(':')[1].replace('\t', '').replace(
+            '\n', '')
+        self.knapsack_data_type = lines[1].split(':')[1].replace('\t',
+                                                                 '').replace(
+                                                                     '\n', '')
+        self.nodes_num = int(lines[2].split(':')[1].replace('\t', '').replace(
+            '\n', ''))
+        self.items_num = int(lines[3].split(':')[1].replace('\t', '').replace(
+            '\n', ''))
+        self.max_capacity = int(lines[4].split(':')[1].replace('\t',
+                                                               '').replace(
+                                                                   '\n', ''))
+        self.min_speed = float(lines[5].split(':')[1].replace('\t',
+                                                              '').replace(
+                                                                  '\n', ''))
+        self.max_speed = float(lines[6].split(':')[1].replace('\t',
+                                                              '').replace(
+                                                                  '\n', ''))
+        self.renting_ratio = float(lines[7].split(':')[1].replace(
+            '\t', '').replace('\n', ''))
+        self.edge_weight_type = lines[8].split(':')[1].replace('\t',
+                                                               '').replace(
+                                                                   '\n', '')
 
         node_lines = lines[10:self.nodes_num + 10]
-        item_lines = lines[self.nodes_num + 11:self.nodes_num + self.items_num + 11]
+        item_lines = lines[self.nodes_num + 11:self.nodes_num +
+                           self.items_num + 11]
 
         for node_line in node_lines:
             _, x, y = node_line.split()
