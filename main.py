@@ -11,9 +11,9 @@
 #              greedy_type='static',
 #              tournament_size=30)
 #
-# eng.load_data('hard_0.ttp')
+# eng.load_data('medium_0.ttp')
 #
-# eng.run(generations=100, info_every=10, visualize_result=True)
+# eng.run(generations=250, info_every=10, visualize_result=True)
 
 from collector import Collector, Test
 
@@ -37,10 +37,18 @@ collectors = [ct, ce, cm]
 
 # create tests
 
-test_mut = Test(mutable_param='mutation_rate',
-                values=[i / 10 for i in range(11)],
-                sample=SAMPLE_SIZE,
-                parameters=PARAMS)
+test_mut_swap = Test(mutable_param='mutation_rate',
+                     values=[i / 10 for i in range(11)],
+                     sample=SAMPLE_SIZE,
+                     parameters={'generations': 250, 'mutation_method': 'swap'})
+test_mut_inv = Test(mutable_param='mutation_rate',
+                    values=[i / 10 for i in range(11)],
+                    sample=SAMPLE_SIZE,
+                    parameters={'generations': 250, 'mutation_method': 'inverse'})
+test_mut_shuf = Test(mutable_param='mutation_rate',
+                     values=[i / 10 for i in range(11)],
+                     sample=SAMPLE_SIZE,
+                     parameters={'generations': 250, 'mutation_method': 'shuffle'})
 test_surv = Test(mutable_param='survival_rate',
                  values=[i / 10 for i in range(11)],
                  sample=SAMPLE_SIZE,
@@ -65,24 +73,21 @@ test_sel = Test(mutable_param='selection_method',
                 values=['tournament', 'roulette'],
                 sample=SAMPLE_SIZE,
                 parameters=PARAMS)
-test_mut_met = Test(mutable_param='mutation_method',
-                    values=['swap', 'inverse', 'shuffle'],
-                    sample=SAMPLE_SIZE,
-                    parameters=PARAMS)
 test_gen = Test(mutable_param='generations',
                 values=range(100, 1001, 100),
                 sample=SAMPLE_SIZE,
                 parameters=dict())
 
 # distribute tests
-distribute_test(collectors, test_mut)
+distribute_test(collectors, test_mut_swap)
+distribute_test(collectors, test_mut_inv)
+distribute_test(collectors, test_mut_shuf)
 distribute_test(collectors, test_surv)
 distribute_test(collectors, test_cros_met)
-distribute_test(collectors, test_greed)
+# distribute_test(collectors, test_greed) TODO fix
 distribute_test(collectors, test_tour)
 distribute_test(collectors, test_pop)
 distribute_test(collectors, test_sel)
-distribute_test(collectors, test_mut_met)
 distribute_test(collectors, test_gen)
 
 # estimate execution time
@@ -102,7 +107,7 @@ if input('Continue?[y/n]: ') != 'y':
 
 # execute
 for c in collectors:
-    print(25 * '=')
+    print(15 * '=' + ' ' + c.data_file + ' ' + 15 * '=')
     c.init()
     c.run()
     c.close()
