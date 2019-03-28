@@ -178,7 +178,7 @@ class Engine:
                 0].fitness if self.keep_best else self.best_entity.fitness
             print(
                 '{}\nAlgorithm terminated on generation: {}\nFinal fitness: {}'
-                .format(20 * '=', generation, best_fitness))
+                    .format(20 * '=', generation, best_fitness))
             self.visualize_best()
             self.plot_data()
 
@@ -200,7 +200,7 @@ class Engine:
         Updates best found entity, used when best can be mutated/lost
         """
         if self.best_entity is None or self.best_entity.fitness < self.population[
-                0].fitness:
+            0].fitness:
             self.best_entity = self.population[0].copy()
 
     def test(self):
@@ -307,6 +307,8 @@ class Engine:
             self.selection_roulette()
         elif self.selection_method == 'tournament':
             self.selection_tournament()
+        elif self.selection_method == 'random':
+            self.selection_random_search()
         else:
             print('Selection type error')
             exit(1)
@@ -335,7 +337,7 @@ class Engine:
         # softmax
         # max for stability
         max_w = max(weights)
-        norm_weights = [math.e**(w - max_w) for w in weights]
+        norm_weights = [math.e ** (w - max_w) for w in weights]
 
         denominator = sum(norm_weights)
         for i in range(len(norm_weights)):
@@ -348,6 +350,18 @@ class Engine:
             child = p1.mate(p2, self.mutation_rate, self.crossover_method,
                             self.mutation_method)
             new_population.append(child)
+
+        self.population = new_population
+
+    def selection_random_search(self):
+        """
+        Simulates random search
+        """
+
+        new_population = [
+            Entity(self.nodes_num) for i in range(self.population_size)
+        ]
+        new_population[0] = self.population[0]
 
         self.population = new_population
 
@@ -427,29 +441,29 @@ class Engine:
             '\n', '')
         self.knapsack_data_type = lines[1].split(':')[1].replace('\t',
                                                                  '').replace(
-                                                                     '\n', '')
+            '\n', '')
         self.nodes_num = int(lines[2].split(':')[1].replace('\t', '').replace(
             '\n', ''))
         self.items_num = int(lines[3].split(':')[1].replace('\t', '').replace(
             '\n', ''))
         self.max_capacity = int(lines[4].split(':')[1].replace('\t',
                                                                '').replace(
-                                                                   '\n', ''))
+            '\n', ''))
         self.min_speed = float(lines[5].split(':')[1].replace('\t',
                                                               '').replace(
-                                                                  '\n', ''))
+            '\n', ''))
         self.max_speed = float(lines[6].split(':')[1].replace('\t',
                                                               '').replace(
-                                                                  '\n', ''))
+            '\n', ''))
         self.renting_ratio = float(lines[7].split(':')[1].replace(
             '\t', '').replace('\n', ''))
         self.edge_weight_type = lines[8].split(':')[1].replace('\t',
                                                                '').replace(
-                                                                   '\n', '')
+            '\n', '')
 
         node_lines = lines[10:self.nodes_num + 10]
         item_lines = lines[self.nodes_num + 11:self.nodes_num +
-                           self.items_num + 11]
+                                               self.items_num + 11]
 
         for node_line in node_lines:
             _, x, y = node_line.split()
